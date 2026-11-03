@@ -72,6 +72,17 @@
   .center { text-align: center; color: var(--muted); padding: 40px 0; }
   .link { background: none; border: 0; color: var(--green); font: inherit; font-size: 14px;
           text-decoration: underline; cursor: pointer; padding: 0; }
+  .duebox { background: #F1F6F2; border: 1px solid #D4E3D8; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+  .duerow { display: flex; justify-content: space-between; font-size: 15px; padding: 3px 0; color: var(--muted); }
+  .duerow b { color: var(--text); }
+  .duerow.strong { border-top: 1px solid #D4E3D8; margin-top: 6px; padding-top: 8px; color: var(--text); font-weight: 600; }
+  .duerow.strong b { font-size: 18px; color: var(--green); }
+  .paytype { display: flex; gap: 10px; }
+  .pt { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 14px 10px; font: inherit;
+        font-weight: 650; font-size: 16px; color: var(--text); cursor: pointer; }
+  .pt small { display: block; font-weight: 500; font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .pt.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .pt.on small { color: rgba(255,255,255,.85); }
   .tools { display: flex; gap: 10px; }
   .tools .btn { margin-top: 0; }
   header .top { display: flex; justify-content: space-between; align-items: center; max-width: 520px; margin: 0 auto; }
@@ -106,21 +117,21 @@
     <select id="family"></select>
     <label for="month">For month</label>
     <select id="month"></select>
-    <div class="row">
-      <div>
-        <label>Persons</label>
-        <div class="stepper">
-          <button type="button" id="pMinus">&minus;</button>
-          <input id="persons" type="number" inputmode="numeric" min="1" max="20">
-          <button type="button" id="pPlus">+</button>
-        </div>
-      </div>
-      <div>
-        <label for="amount">Amount (taka)</label>
-        <input id="amount" type="number" inputmode="numeric" min="1">
-      </div>
+    <div id="dueBox" class="duebox hidden">
+      <div class="duerow"><span id="dueLabel">Due</span><b id="dueAmt"></b></div>
+      <div class="duerow" id="paidRow"><span>Already paid this month</span><b id="alreadyAmt"></b></div>
+      <div class="duerow strong" id="remRow"><span>Remaining</span><b id="remAmt"></b></div>
     </div>
-    <div class="hint" id="calc"></div>
+
+    <label>Payment</label>
+    <div class="paytype">
+      <button type="button" class="pt" data-t="full" id="ptFull">Full paid<small id="fullAmt"></small></button>
+      <button type="button" class="pt" data-t="partial" id="ptPartial">Partial<small>enter amount</small></button>
+    </div>
+    <div id="partialWrap" class="hidden">
+      <label for="amount">Amount paid (taka)</label>
+      <input id="amount" type="number" inputmode="numeric" min="1" placeholder="e.g. 300">
+    </div>
     <label>Paid by</label>
     <div class="chips" id="methods"></div>
     <div id="txnWrap">
@@ -179,7 +190,7 @@
   var API = 'https://lmvcjdqdbtczqkunuvuv.supabase.co/rest/v1/rpc/';
   var KEY = 'sb_publishable_kyg2uy9TmKa2BzTNLhRPRw_BcsPgJT9';
   var MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var S = { pw: '', d: null, method: '', pending: null, savedId: null };
+  var S = { pw: '', d: null, method: '', pay: '', pending: null, savedId: null };
   var $ = function (id) { return document.getElementById(id); };
   function show(id, on) { $(id).classList.toggle('hidden', !on); }
   function err(id, m) { var el = $(id); el.textContent = m || ''; el.style.display = m ? 'block' : 'none'; }
@@ -254,51 +265,77 @@
 
   function resetForm() {
     $('date').value = todayIso(); $('family').value = ''; $('month').value = currentMonth();
-    $('persons').value = ''; $('amount').value = ''; $('calc').textContent = '';
-    $('txn').value = ''; $('notes').value = '';
-    $('by').value = load('pf_by') || S.d.treasurer || '';
-    setMethod(''); err('formErr', '');
+    $('amount').value = ''; $('txn').value = ''; $('notes').value = '';
+    $('by').value = S.d.treasurer || 'Nabil';
+    setMethod(''); setPay(''); updateDue(); err('formErr', '');
   }
 
   function setMethod(m) {
     S.method = m;
     Array.prototype.forEach.call($('methods').children, function (b) { b.classList.toggle('on', b.getAttribute('data-m') === m); });
-    show('txnWrap', m !== 'Cash');
+    show('txnWrap', m !== 'Cash' && m !== '');
+  }
+
+  function setPay(t) {
+    S.pay = t;
+    $('ptFull').classList.toggle('on', t === 'full');
+    $('ptPartial').classList.toggle('on', t === 'partial');
+    show('partialWrap', t === 'partial');
+    if (t === 'partial') setTimeout(function () { $('amount').focus(); }, 50);
   }
 
   function fam(name) { for (var i = 0; i < S.d.families.length; i++) if (S.d.families[i].name === name) return S.d.families[i]; return null; }
-  function recalc() { var p = Number($('persons').value) || 0; $('amount').value = p ? p * S.d.rate : ''; updateCalc(); }
-  function updateCalc() {
-    var p = Number($('persons').value) || 0, a = Number($('amount').value) || 0;
-    if (!p) { $('calc').textContent = ''; return; }
-    var exp = p * S.d.rate;
-    $('calc').textContent = p + ' x ' + S.d.rate + ' = ' + fmt(exp) + ' taka' + (a && a !== exp ? '  (entered ' + fmt(a) + ')' : '');
+
+  // due, already paid and remaining for the selected family and month
+  function dueInfo() {
+    var f = fam($('family').value); if (!f) return null;
+    var due = f.members * S.d.rate, paid = paidBy(f.name, $('month').value);
+    var rem = Math.max(0, due - paid);
+    return { f: f, due: due, paid: paid, rem: rem, full: rem > 0 ? rem : due };
   }
+
+  function updateDue() {
+    var x = dueInfo();
+    show('dueBox', !!x);
+    if (!x) { $('fullAmt').textContent = ''; return; }
+    $('dueLabel').textContent = 'Due for ' + monthLabel($('month').value) + ' (' + x.f.members + ' x ' + S.d.rate + ')';
+    $('dueAmt').textContent = fmt(x.due) + ' taka';
+    show('paidRow', x.paid > 0); show('remRow', x.paid > 0);
+    $('alreadyAmt').textContent = fmt(x.paid) + ' taka';
+    $('remAmt').textContent = x.rem > 0 ? fmt(x.rem) + ' taka' : 'Fully paid';
+    $('fullAmt').textContent = fmt(x.full) + ' taka';
+  }
+
   function isLate(dateIso, monthIso) { return dateIso > monthIso.slice(0, 8) + pad(S.d.deadline); }
 
   function review() {
     err('formErr', '');
+    var x = dueInfo();
+    if (!$('date').value) return err('formErr', 'Pick the date it was received.');
+    if (!x) return err('formErr', 'Pick a family.');
+    if (!S.pay) return err('formErr', 'Tap Full paid or Partial.');
+    var amount = S.pay === 'full' ? x.full : Number($('amount').value);
+    if (!(amount > 0)) return err('formErr', 'Write the amount paid.');
+    if (!S.method) return err('formErr', 'Pick how it was paid.');
     var e = {
-      received_on: $('date').value, family: $('family').value, for_month: $('month').value,
-      persons: Number($('persons').value), amount: Number($('amount').value), method: S.method,
-      txn: S.method === 'Cash' ? '' : $('txn').value.trim(), received_by: $('by').value.trim(), notes: $('notes').value.trim()
+      received_on: $('date').value, family: x.f.name, for_month: $('month').value,
+      persons: x.f.members, amount: amount, method: S.method,
+      txn: S.method === 'Cash' ? '' : $('txn').value.trim(), received_by: $('by').value.trim(),
+      notes: [S.pay === 'partial' ? 'Partial' : '', $('notes').value.trim()].filter(Boolean).join('. ')
     };
-    if (!e.received_on) return err('formErr', 'Pick the date it was received.');
-    if (!e.family) return err('formErr', 'Pick a family.');
-    if (!(e.persons >= 1 && e.persons <= 20)) return err('formErr', 'Enter how many persons.');
-    if (!(e.amount > 0)) return err('formErr', 'Enter the amount.');
-    if (!e.method) return err('formErr', 'Pick how it was paid.');
     S.pending = e;
     var late = isLate(e.received_on, e.for_month);
+    var after = Math.max(0, x.due - x.paid - amount);
     $('cAmount').textContent = fmt(e.amount) + ' taka';
     var rows = [
-      ['Family', esc(e.family)], ['For month', monthLabel(e.for_month)], ['Persons', e.persons],
+      ['Family', esc(e.family) + ' (' + e.persons + ')'], ['For month', monthLabel(e.for_month)],
+      ['Payment', S.pay === 'full' ? 'Full paid' : 'Partial'],
+      ['Still due after this', after > 0 ? fmt(after) + ' taka' : 'Nothing'],
       ['Paid by', esc(e.method + (e.txn ? ' (' + e.txn + ')' : ''))], ['Date received', niceDate(e.received_on)],
       ['Status', late ? '<span class="tag late">Late</span>' : '<span class="tag ok">On time</span>'],
       ['Received by', esc(e.received_by || '-')]
     ];
-    if (e.amount !== e.persons * S.d.rate) rows.push(['Expected', fmt(e.persons * S.d.rate) + ' taka']);
-    if (e.notes) rows.push(['Notes', esc(e.notes)]);
+    if ($('notes').value.trim()) rows.push(['Notes', esc($('notes').value.trim())]);
     $('cList').innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
     err('saveErr', ''); show('form', false); show('confirm', true); window.scrollTo(0, 0);
   }
@@ -307,7 +344,7 @@
     $('saveBtn').disabled = true; $('saveBtn').textContent = 'Saving...';
     rpc('pf_add', { p_pw: S.pw, p: S.pending }).then(function (d) {
       $('saveBtn').disabled = false; $('saveBtn').textContent = 'Save deposit';
-      S.d = d; S.savedId = d.saved_id; store('pf_by', S.pending.received_by);
+      S.d = d; S.savedId = d.saved_id;
       $('doneText').textContent = fmt(S.pending.amount) + ' taka from ' + S.pending.family + ' saved';
       err('undoErr', ''); show('undoBtn', true); show('confirm', false); show('done', true); render();
     }).catch(function (e) {
@@ -391,11 +428,10 @@
   $('loginBtn').onclick = login;
   $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
   $('outBtn').onclick = logout;
-  $('family').onchange = function () { var f = fam($('family').value); $('persons').value = f ? f.members : ''; recalc(); };
-  $('persons').oninput = recalc;
-  $('amount').oninput = updateCalc;
-  $('pMinus').onclick = function () { var v = Number($('persons').value) || 1; $('persons').value = Math.max(1, v - 1); recalc(); };
-  $('pPlus').onclick = function () { var v = Number($('persons').value) || 0; $('persons').value = Math.min(20, v + 1); recalc(); };
+  $('family').onchange = function () { updateDue(); };
+  $('month').onchange = function () { updateDue(); };
+  $('ptFull').onclick = function () { setPay('full'); };
+  $('ptPartial').onclick = function () { setPay('partial'); };
   $('reviewBtn').onclick = review;
   $('editBtn').onclick = function () { show('confirm', false); show('form', true); };
   $('saveBtn').onclick = save;
