@@ -2,446 +2,486 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1F4E3D">
+<meta name="theme-color" content="#2F5D3A">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Picnic Fund">
-<title>Family Picnic Fund</title>
+<title>Picnic Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #1F4E3D; --green-2: #2E6B53; --bg: #F4F6F3; --card: #fff;
-    --text: #1d2420; --muted: #66706a; --line: #dfe4df;
-    --ok: #DCEFD6; --ok-t: #256B2E; --part: #FFF1CC; --part-t: #8A6200;
-    --due: #F8D7D5; --due-t: #9B1C1C;
+    --leaf: #2F5D3A; --leaf-dk: #23472C; --leaf-lt: #E5EFE2; --leaf-mid: #9CC29A;
+    --turmeric: #E2A72E; --turmeric-lt: #FBEFD3;
+    --chili: #C8462E; --chili-lt: #F8E1DB;
+    --paper: #F7F9F5; --card: #FFFFFF; --ink: #1E2A22; --muted: #66746A; --line: #E1E7DF;
+    --r-lg: 18px; --r-md: 12px; --r-sm: 999px;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-         background: var(--bg); color: var(--text); font-size: 16px; }
-  header { background: var(--green); color: #fff; padding: 18px 16px 16px; }
-  header h1 { margin: 0; font-size: 20px; font-weight: 650; }
-  header p { margin: 4px 0 0; opacity: .8; font-size: 13px; }
-  main { max-width: 520px; margin: 0 auto; padding: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-          padding: 16px; margin-bottom: 16px; }
-  .card h2 { font-size: 15px; margin: 0 0 12px; }
-  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
-  label:first-of-type { margin-top: 0; }
-  input, select, textarea { width: 100%; font: inherit; padding: 12px; border: 1px solid var(--line);
-          border-radius: 10px; background: #fff; color: var(--text); }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--green-2); border-color: transparent; }
-  .row { display: flex; gap: 10px; }
-  .row > div { flex: 1; min-width: 0; }
-  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 10px 16px;
-          font: inherit; font-size: 15px; cursor: pointer; color: var(--text); }
-  .chip.on { background: var(--green); border-color: var(--green); color: #fff; }
-  .stepper { display: flex; align-items: center; gap: 8px; }
-  .stepper button { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--line);
-          background: #fff; font-size: 20px; cursor: pointer; color: var(--text); }
-  .stepper input { text-align: center; }
-  .btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; font: inherit; font-weight: 650;
-         background: var(--green); color: #fff; cursor: pointer; margin-top: 18px; }
-  .btn.ghost { background: #fff; color: var(--green); border: 1px solid var(--green); }
-  .btn:disabled { opacity: .5; cursor: default; }
-  .err { background: var(--due); color: var(--due-t); border-radius: 10px; padding: 10px 12px;
-         font-size: 14px; margin-top: 12px; display: none; }
-  .confirm dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0; }
-  .confirm dt { color: var(--muted); font-size: 14px; }
-  .confirm dd { margin: 0; font-weight: 600; text-align: right; }
-  .big { font-size: 28px; font-weight: 700; text-align: center; margin: 4px 0 14px; }
-  .tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 650; }
-  .tag.ok { background: var(--ok); color: var(--ok-t); }
-  .tag.late { background: var(--due); color: var(--due-t); }
-  .tag.part { background: var(--part); color: var(--part-t); }
-  .success { text-align: center; }
-  .success .tick { width: 56px; height: 56px; border-radius: 50%; background: var(--ok); color: var(--ok-t);
-          display: grid; place-items: center; font-size: 30px; margin: 4px auto 10px; }
-  .status-list { list-style: none; padding: 0; margin: 0; }
-  .status-list li { display: flex; justify-content: space-between; align-items: center;
-          padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
-  .status-list li:last-child { border-bottom: 0; }
-  .totals { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
-  .totals b { color: var(--text); }
-  .recent { font-size: 14px; }
-  .recent div { padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .recent div:last-child { border-bottom: 0; }
-  .recent small { color: var(--muted); display: block; margin-top: 2px; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body { font-family: "Hind Siliguri", system-ui, sans-serif; background: var(--paper); color: var(--ink);
+         font-size: 16px; line-height: 1.4; padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--turmeric); outline-offset: 2px; }
   .hidden { display: none !important; }
-  .center { text-align: center; color: var(--muted); padding: 40px 0; }
-  .link { background: none; border: 0; color: var(--green); font: inherit; font-size: 14px;
-          text-decoration: underline; cursor: pointer; padding: 0; }
-  .duebox { background: #F1F6F2; border: 1px solid #D4E3D8; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
-  .duerow { display: flex; justify-content: space-between; font-size: 15px; padding: 3px 0; color: var(--muted); }
-  .duerow b { color: var(--text); }
-  .duerow.strong { border-top: 1px solid #D4E3D8; margin-top: 6px; padding-top: 8px; color: var(--text); font-weight: 600; }
-  .duerow.strong b { font-size: 18px; color: var(--green); }
-  .paytype { display: flex; gap: 10px; }
-  .pt { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 14px 10px; font: inherit;
-        font-weight: 650; font-size: 16px; color: var(--text); cursor: pointer; }
-  .pt small { display: block; font-weight: 500; font-size: 13px; color: var(--muted); margin-top: 3px; }
-  .pt.on { background: var(--green); border-color: var(--green); color: #fff; }
-  .pt.on small { color: rgba(255,255,255,.85); }
-  .tools { display: flex; gap: 10px; }
-  .tools .btn { margin-top: 0; }
-  header .top { display: flex; justify-content: space-between; align-items: center; max-width: 520px; margin: 0 auto; }
-  header .out { background: rgba(255,255,255,.15); color: #fff; border: 0; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+  .top { background: var(--leaf); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 0 22px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-weight: 700; font-size: 18px; letter-spacing: .2px; }
+  .ghost-w { background: rgba(255,255,255,.14); border: 0; color: #fff; border-radius: var(--r-sm); padding: 6px 14px; font-size: 14px; }
+  .month { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+  .month button { width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 22px; line-height: 1; }
+  .month button:disabled { opacity: .3; cursor: default; }
+  .month-name { font-size: 28px; font-weight: 700; text-align: center; line-height: 1.1; }
+  .month-sub { font-size: 14px; opacity: .8; text-align: center; }
+  .pot { margin-top: 16px; }
+  .pot-line { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+  .pot-line b { font-size: 22px; }
+  .pot-bar { height: 10px; background: rgba(255,255,255,.18); border-radius: var(--r-sm); margin-top: 8px; overflow: hidden; }
+  .pot-bar i { display: block; height: 100%; width: 0; background: var(--turmeric); border-radius: var(--r-sm); transition: width .6s ease; }
+
+  .hint { color: var(--muted); font-size: 14px; margin: 18px 2px 10px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 560px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .tile { position: relative; overflow: hidden; text-align: left; background: var(--card); border: 1.5px solid var(--line);
+          border-radius: var(--r-md); padding: 12px 12px 14px; min-height: 92px; }
+  .tile .fill { position: absolute; left: 0; bottom: 0; top: 0; width: 0; background: var(--leaf-lt); transition: width .7s cubic-bezier(.2,.8,.2,1); }
+  .tile.part .fill { background: var(--turmeric-lt); }
+  .tile > *:not(.fill) { position: relative; }
+  .tile .name { font-weight: 600; font-size: 16px; display: block; padding-right: 24px; }
+  .tile .ppl { color: var(--muted); font-size: 13px; }
+  .tile .amt { display: block; margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .tile .amt b { color: var(--ink); font-weight: 600; }
+  .tile.full { border-color: var(--leaf-mid); }
+  .tile.full .amt b { color: var(--leaf); }
+  .tile.part { border-color: #EBCB82; }
+  .tile.over { border-color: #E8A898; }
+  .tile.over .amt b { color: var(--chili); }
+  .tile .mark { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%;
+                display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--leaf); color: #fff; }
+
+  .section-h { display: flex; justify-content: space-between; align-items: center; margin: 22px 2px 10px; }
+  .section-h h2 { font-size: 18px; margin: 0; }
+  .btn-sm { border: 1.5px solid var(--leaf); background: #fff; color: var(--leaf); border-radius: var(--r-sm); padding: 6px 14px; font-size: 14px; font-weight: 600; }
+  .list { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .item { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: 0; }
+  .item .who { font-weight: 600; }
+  .item .meta { color: var(--muted); font-size: 13px; }
+  .item .money { text-align: right; white-space: nowrap; }
+  .item .money b { display: block; font-size: 17px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; border-radius: var(--r-sm); padding: 1px 9px; }
+  .pill.late { background: var(--chili-lt); color: var(--chili); }
+  .pill.ok { background: var(--leaf-lt); color: var(--leaf); }
+  .pill.part { background: var(--turmeric-lt); color: #8A5F00; }
+  .empty { padding: 22px 14px; color: var(--muted); text-align: center; }
+  .total-line { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; padding: 10px 4px 0; }
+  .total-line b { color: var(--ink); }
+
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line);
+          display: flex; justify-content: center; gap: 8px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
+  .tabs button { flex: 1; max-width: 220px; border: 0; background: none; border-radius: var(--r-md); padding: 10px; font-weight: 600; color: var(--muted); font-size: 15px; }
+  .tabs button.on { background: var(--leaf-lt); color: var(--leaf); }
+
+  .scrim { position: fixed; inset: 0; background: rgba(20,32,24,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 10; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px; max-height: 92vh; overflow-y: auto;
+           background: var(--card); border-radius: 22px 22px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+           transform: translateY(105%); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s .3s; z-index: 11; }
+  .sheet.open { transform: translateY(0); visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 12px; }
+  .sh-head { display: flex; justify-content: space-between; align-items: flex-start; }
+  .sh-head h3 { margin: 0; font-size: 24px; line-height: 1.15; }
+  .sh-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .close { border: 0; background: var(--paper); width: 36px; height: 36px; border-radius: 50%; font-size: 16px; color: var(--muted); flex: none; }
+  .ledger { display: flex; margin: 16px 0 4px; border: 1px solid var(--line); border-radius: var(--r-md); }
+  .ledger div { flex: 1; padding: 10px 12px; }
+  .ledger div + div { border-left: 1px solid var(--line); }
+  .ledger span { display: block; font-size: 13px; color: var(--muted); }
+  .ledger b { font-size: 18px; }
+  .ledger .rem b { color: var(--leaf); }
+  .ledger .rem.zero b { color: var(--muted); }
+  .lbl { font-size: 14px; font-weight: 600; margin: 16px 0 8px; display: block; }
+  .two { display: flex; gap: 10px; }
+  .choice { flex: 1; border: 1.5px solid var(--line); background: #fff; border-radius: var(--r-md); padding: 12px; text-align: center; font-weight: 600; font-size: 16px; }
+  .choice small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
+  .choice.on { border-color: var(--leaf); background: var(--leaf); color: #fff; }
+  .choice.on small { color: rgba(255,255,255,.85); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1.5px solid var(--line); background: #fff; border-radius: var(--r-sm); padding: 8px 16px; font-size: 15px; }
+  .chip.on { border-color: var(--leaf); background: var(--leaf); color: #fff; }
+  .field { width: 100%; border: 1.5px solid var(--line); border-radius: var(--r-md); padding: 12px; background: #fff; font-size: 16px; }
+  .field:focus { outline: none; border-color: var(--leaf); }
+  .money-in { position: relative; }
+  .money-in span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; }
+  .money-in .field { padding-left: 34px; font-size: 20px; font-weight: 600; }
+  .row-mini { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .row-mini .k { color: var(--muted); }
+  .row-mini .v { font-weight: 600; flex: 1; }
+  .linkish { border: 0; background: none; color: var(--leaf); font-weight: 600; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+  .save { width: 100%; border: 0; background: var(--leaf); color: #fff; border-radius: var(--r-md); padding: 14px; font-size: 18px; font-weight: 700; margin-top: 16px; }
+  .save:disabled { background: #A9B8AC; cursor: default; }
+  .save small { display: block; font-weight: 400; font-size: 13px; opacity: .85; }
+  .err { background: var(--chili-lt); color: var(--chili); border-radius: var(--r-md); padding: 10px 12px; font-size: 14px; margin-top: 12px; }
+
+  .login { max-width: 380px; margin: 14vh auto 0; padding: 0 20px; text-align: center; }
+  .login h1 { font-size: 32px; margin: 0; color: var(--leaf); }
+  .login p { color: var(--muted); margin: 0 0 22px; }
+  .login .save { margin-top: 12px; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0;
+           background: var(--ink); color: #fff; border-radius: var(--r-md); padding: 12px 14px 12px 16px; display: flex; gap: 16px; align-items: center;
+           font-size: 15px; transition: opacity .25s, transform .25s; z-index: 20; width: max-content; max-width: calc(100% - 32px); pointer-events: none; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .toast button { border: 0; background: none; color: var(--turmeric); font-weight: 700; }
+  .loading { text-align: center; color: var(--muted); padding-top: 30vh; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<header>
-  <div class="top">
+
+<div id="loginView" class="login">
+  <h1>Picnic Fund</h1>
+  <p>Family picnic savings</p>
+  <input id="pw" class="field" type="password" autocomplete="current-password" placeholder="Password">
+  <button class="save" id="loginBtn">Open</button>
+  <div class="err hidden" id="loginErr"></div>
+</div>
+<div id="loadingView" class="loading hidden">Opening...</div>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="wrap">
+      <div class="top-row">
+        <span class="brand">Picnic Fund</span>
+        <button class="ghost-w" id="outBtn">Log out</button>
+      </div>
+      <div class="month">
+        <button id="prevM" aria-label="Previous month">&#8249;</button>
+        <div>
+          <div class="month-name" id="mName"></div>
+          <div class="month-sub" id="mSub"></div>
+        </div>
+        <button id="nextM" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="pot">
+        <div class="pot-line"><span>Collected this month</span><span><b id="mGot"></b> of <span id="mDue"></span></span></div>
+        <div class="pot-bar"><i id="mBar"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="tabAdd">
+      <p class="hint">Tap a family to record their payment.</p>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section id="tabRec" class="hidden">
+      <div class="section-h">
+        <h2>Records</h2>
+        <button class="btn-sm" id="xlsBtn">Download Excel</button>
+      </div>
+      <div class="list" id="recList"></div>
+      <div class="total-line"><span>Total fund so far</span><b id="fundTotal"></b></div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="on" data-tab="tabAdd">Families</button>
+    <button data-tab="tabRec">Records</button>
+  </nav>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shName">
+  <div class="grab"></div>
+  <div class="sh-head">
     <div>
-      <h1>Family Picnic Fund</h1>
-      <p id="sub">Monthly deposits</p>
+      <h3 id="shName"></h3>
+      <p id="shSub"></p>
     </div>
-    <button class="out hidden" id="outBtn">Log out</button>
+    <button class="close" id="closeBtn" aria-label="Close">&#10005;</button>
   </div>
-</header>
-<main>
-  <section id="login" class="card">
-    <h2>Enter password</h2>
-    <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
-    <button class="btn" id="loginBtn">Open</button>
-    <div class="err" id="loginErr"></div>
-  </section>
 
-  <div id="loading" class="center hidden">Loading...</div>
+  <div class="ledger">
+    <div><span>Due</span><b id="lgDue"></b></div>
+    <div><span>Paid</span><b id="lgPaid"></b></div>
+    <div class="rem" id="lgRemBox"><span>Remaining</span><b id="lgRem"></b></div>
+  </div>
 
-  <section id="form" class="card hidden">
-    <h2>New deposit</h2>
-    <label for="date">Date received</label>
-    <input id="date" type="date">
-    <label for="family">Family</label>
-    <select id="family"></select>
-    <label for="month">For month</label>
-    <select id="month"></select>
-    <div id="dueBox" class="duebox hidden">
-      <div class="duerow"><span id="dueLabel">Due</span><b id="dueAmt"></b></div>
-      <div class="duerow" id="paidRow"><span>Already paid this month</span><b id="alreadyAmt"></b></div>
-      <div class="duerow strong" id="remRow"><span>Remaining</span><b id="remAmt"></b></div>
-    </div>
+  <span class="lbl">How much</span>
+  <div class="two">
+    <button class="choice" id="ptFull">Full paid<small id="fullAmt"></small></button>
+    <button class="choice" id="ptPart">Partial<small>type amount</small></button>
+  </div>
+  <div id="partWrap" class="money-in hidden" style="margin-top:10px">
+    <span>&#2547;</span>
+    <input id="amount" class="field" type="number" inputmode="numeric" min="1" placeholder="0">
+  </div>
 
-    <label>Payment</label>
-    <div class="paytype">
-      <button type="button" class="pt" data-t="full" id="ptFull">Full paid<small id="fullAmt"></small></button>
-      <button type="button" class="pt" data-t="partial" id="ptPartial">Partial<small>enter amount</small></button>
-    </div>
-    <div id="partialWrap" class="hidden">
-      <label for="amount">Amount paid (taka)</label>
-      <input id="amount" type="number" inputmode="numeric" min="1" placeholder="e.g. 300">
-    </div>
-    <label>Paid by</label>
-    <div class="chips" id="methods"></div>
-    <div id="txnWrap">
-      <label for="txn">Transaction ID (optional)</label>
-      <input id="txn" type="text" placeholder="e.g. bKash TrxID">
-    </div>
-    <label for="by">Received by</label>
-    <input id="by" type="text" placeholder="Name">
-    <label for="notes">Notes (optional)</label>
-    <textarea id="notes" rows="2"></textarea>
-    <button class="btn" id="reviewBtn">Check and save</button>
-    <div class="err" id="formErr"></div>
-  </section>
+  <span class="lbl">Paid by</span>
+  <div class="chips" id="methods"></div>
+  <input id="txn" class="field hidden" style="margin-top:10px" type="text" placeholder="Transaction ID (optional)">
 
-  <section id="confirm" class="card confirm hidden">
-    <h2>Check before saving</h2>
-    <div class="big" id="cAmount"></div>
-    <dl id="cList"></dl>
-    <button class="btn" id="saveBtn">Save deposit</button>
-    <button class="btn ghost" id="editBtn">Go back and edit</button>
-    <div class="err" id="saveErr"></div>
-  </section>
+  <span class="lbl">Date received</span>
+  <div class="chips" id="dates">
+    <button class="chip" data-d="today">Today</button>
+    <button class="chip" data-d="yday">Yesterday</button>
+    <button class="chip" data-d="pick">Other date</button>
+  </div>
+  <input id="date" class="field hidden" style="margin-top:10px" type="date">
 
-  <section id="done" class="card success hidden">
-    <div class="tick">&#10003;</div>
-    <h2 id="doneText">Saved</h2>
-    <button class="btn" id="againBtn">Add another</button>
-    <p><button class="link" id="undoBtn">Undo this entry</button></p>
-    <div class="err" id="undoErr"></div>
-  </section>
+  <div class="row-mini">
+    <span class="k">Received by</span>
+    <span class="v" id="byShow"></span>
+    <button class="linkish" id="byEdit">Change</button>
+  </div>
+  <input id="by" class="field hidden" type="text" placeholder="Name">
 
-  <section id="statusCard" class="card hidden">
-    <h2>Status for <span id="sMonth"></span></h2>
-    <select id="sMonthSel" style="margin-bottom:12px"></select>
-    <div class="totals"><span>Collected <b id="sGot"></b></span><span>of <b id="sDue"></b></span></div>
-    <ul class="status-list" id="sList"></ul>
-    <div class="totals" style="margin-top:14px;margin-bottom:0"><span>Total fund so far</span><b id="fundTotal"></b></div>
-  </section>
+  <button class="linkish" id="noteBtn" style="margin-top:6px">Add a note</button>
+  <textarea id="notes" class="field hidden" rows="2" style="margin-top:8px" placeholder="Note"></textarea>
 
-  <section id="toolsCard" class="card hidden">
-    <h2>Excel</h2>
-    <div class="tools">
-      <button class="btn" id="xlsBtn">Download Excel</button>
-    </div>
-    <div class="hint">Includes a Summary sheet and every deposit.</div>
-  </section>
+  <div class="err hidden" id="sheetErr"></div>
+  <button class="save" id="saveBtn" disabled>Choose full or partial</button>
+</div>
 
-  <section id="recentCard" class="card hidden">
-    <h2>Recent entries</h2>
-    <div class="recent" id="recent"></div>
-  </section>
-</main>
+<div class="toast" id="toast"><span id="toastText"></span><button id="undoBtn">Undo</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
   var API = 'https://lmvcjdqdbtczqkunuvuv.supabase.co/rest/v1/rpc/';
   var KEY = 'sb_publishable_kyg2uy9TmKa2BzTNLhRPRw_BcsPgJT9';
-  var MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var S = { pw: '', d: null, method: '', pay: '', pending: null, savedId: null };
+  var MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var S = { pw: '', d: null, mi: 0, fam: null, pay: '', method: '', date: '', savedId: null, busy: false };
   var $ = function (id) { return document.getElementById(id); };
+  var each = function (list, fn) { Array.prototype.forEach.call(list, fn); };
   function show(id, on) { $(id).classList.toggle('hidden', !on); }
-  function err(id, m) { var el = $(id); el.textContent = m || ''; el.style.display = m ? 'block' : 'none'; }
-  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+  function tk(n) { return '৳' + Number(n).toLocaleString('en-US'); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function todayIso() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-  function niceDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MN[Number(p[1]) - 1] + ' ' + p[0]; }
-  function monthLabel(iso) { var p = iso.split('-'); return MN[Number(p[1]) - 1] + ' ' + p[0]; }
+  function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function todayIso() { return iso(new Date()); }
+  function ydayIso() { var d = new Date(); d.setDate(d.getDate() - 1); return iso(d); }
+  function niceDate(s) { var p = s.split('-'); return Number(p[2]) + ' ' + MS[Number(p[1]) - 1] + ' ' + p[0]; }
+  function mLong(s) { var p = s.split('-'); return MN[Number(p[1]) - 1] + ' ' + p[0]; }
+  function mShort(s) { var p = s.split('-'); return MS[Number(p[1]) - 1] + ' ' + p[0]; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function errOn(id, m) { $(id).textContent = m || ''; show(id, !!m); }
 
   function rpc(fn, body) {
-    return fetch(API + fn, {
-      method: 'POST',
-      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    }).then(function (r) {
-      if (!r.ok) throw new Error('Server error (' + r.status + '). Try again.');
-      return r.json();
-    }).then(function (j) {
-      if (j && j.error) throw new Error(j.error);
-      return j;
-    }, function (e) {
-      throw new Error(e.message && e.message.indexOf('Server error') === 0 ? e.message : (e.message || 'No connection. Check internet and try again.'));
-    });
+    return fetch(API + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error('Server error (' + r.status + '). Try again.'); return r.json(); },
+            function () { throw new Error('No connection. Check the internet and try again.'); })
+      .then(function (j) { if (j && j.error) throw new Error(j.error); return j; });
   }
 
   function login() {
-    var pw = $('pw').value;
-    if (!pw) return;
-    err('loginErr', ''); $('loginBtn').disabled = true;
+    var pw = $('pw').value; if (!pw) return;
+    errOn('loginErr', ''); $('loginBtn').disabled = true;
     rpc('pf_get', { p_pw: pw }).then(function (d) {
-      S.pw = pw; store('pf_pw', pw); $('loginBtn').disabled = false;
-      show('login', false); start(d);
+      S.pw = pw; store('pf_pw', pw); $('loginBtn').disabled = false; start(d);
     }).catch(function (e) {
       $('loginBtn').disabled = false; store('pf_pw', null);
-      show('loading', false); show('login', true); err('loginErr', e.message);
+      show('loadingView', false); show('loginView', true); errOn('loginErr', e.message);
     });
   }
-
-  function logout() {
-    store('pf_pw', null); S.pw = ''; $('pw').value = '';
-    ['form','confirm','done','statusCard','toolsCard','recentCard','outBtn'].forEach(function (id) { show(id, false); });
-    show('login', true);
-  }
+  function logout() { store('pf_pw', null); S.pw = ''; $('pw').value = ''; closeSheet(); show('app', false); show('loginView', true); }
 
   function start(d) {
     S.d = d;
-    $('sub').textContent = d.rate + ' taka per person, due by the ' + d.deadline + 'th';
-    $('family').innerHTML = '<option value="">Select family</option>' +
-      d.families.map(function (f) { return '<option>' + esc(f.name) + '</option>'; }).join('');
-    var opts = d.months.map(function (m) { return '<option value="' + m + '">' + monthLabel(m) + '</option>'; }).join('');
-    $('month').innerHTML = opts; $('sMonthSel').innerHTML = opts;
-    $('methods').innerHTML = d.methods.map(function (m) {
-      return '<button type="button" class="chip" data-m="' + esc(m) + '">' + esc(m) + '</button>';
-    }).join('');
-    Array.prototype.forEach.call($('methods').children, function (b) {
-      b.onclick = function () { setMethod(b.getAttribute('data-m')); };
-    });
-    resetForm();
-    $('sMonthSel').value = currentMonth();
-    show('loading', false);
-    ['form','statusCard','toolsCard','recentCard','outBtn'].forEach(function (id) { show(id, true); });
+    var t = todayIso().slice(0, 8) + '01', i = d.months.indexOf(t);
+    S.mi = i >= 0 ? i : (t < d.months[0] ? 0 : d.months.length - 1);
+    $('methods').innerHTML = d.methods.map(function (m) { return '<button class="chip" data-m="' + esc(m) + '">' + esc(m) + '</button>'; }).join('');
+    each($('methods').children, function (b) { b.onclick = function () { setMethod(b.getAttribute('data-m')); }; });
+    show('loginView', false); show('loadingView', false); show('app', true);
     render();
   }
 
-  function currentMonth() {
-    var t = todayIso().slice(0, 8) + '01';
-    return S.d.months.indexOf(t) >= 0 ? t : S.d.months[0];
+  function month() { return S.d.months[S.mi]; }
+  function paidBy(name, m) { var t = 0; S.d.deposits.forEach(function (x) { if (x.family === name && x.for_month === m) t += Number(x.amount); }); return t; }
+  function isLate(dIso, mIso) { return dIso > mIso.slice(0, 8) + pad(S.d.deadline); }
+  function famInfo(f) { var due = f.members * S.d.rate, paid = paidBy(f.name, month()); return { due: due, paid: paid, rem: Math.max(0, due - paid) }; }
+
+  function render() {
+    var d = S.d, m = month(), got = 0, due = 0;
+    var overdue = todayIso() > m.slice(0, 8) + pad(d.deadline);
+    $('mName').textContent = mLong(m);
+    $('mSub').textContent = overdue ? 'Deadline passed on the ' + d.deadline + 'th' : 'Due by the ' + d.deadline + 'th';
+    $('prevM').disabled = S.mi === 0; $('nextM').disabled = S.mi === d.months.length - 1;
+
+    $('grid').innerHTML = d.families.map(function (f, i) {
+      var x = famInfo(f); got += x.paid; due += x.due;
+      var cls = x.paid >= x.due ? 'full' : x.paid > 0 ? 'part' : overdue ? 'over' : '';
+      var pct = Math.min(100, Math.round(x.paid / x.due * 100));
+      var amt = x.paid >= x.due ? '<b>Paid ' + tk(x.paid) + '</b>'
+              : x.paid > 0 ? '<b>' + tk(x.paid) + '</b> of ' + tk(x.due)
+              : '<b>' + tk(x.due) + '</b> ' + (overdue ? 'overdue' : 'due');
+      return '<button class="tile ' + cls + '" data-i="' + i + '"><span class="fill" data-w="' + pct + '"></span>' +
+        (cls === 'full' ? '<span class="mark" aria-label="Paid">&#10003;</span>' : '') +
+        '<span class="name">' + esc(f.name) + '</span><span class="ppl">' + f.members + (f.members > 1 ? ' people' : ' person') + '</span>' +
+        '<span class="amt">' + amt + '</span></button>';
+    }).join('');
+    each($('grid').children, function (b) { b.onclick = function () { openSheet(Number(b.getAttribute('data-i'))); }; });
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      each(document.querySelectorAll('.tile .fill'), function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
+    }); });
+
+    $('mGot').textContent = tk(got); $('mDue').textContent = tk(due);
+    $('mBar').style.width = (due ? Math.min(100, got / due * 100) : 0) + '%';
+    renderRecords();
   }
 
-  function resetForm() {
-    $('date').value = todayIso(); $('family').value = ''; $('month').value = currentMonth();
+  function renderRecords() {
+    var list = S.d.deposits.slice().reverse();
+    $('recList').innerHTML = list.length ? list.map(function (r) {
+      var late = isLate(r.received_on, r.for_month), part = /^Partial/.test(r.notes || '');
+      return '<div class="item"><div><div class="who">' + esc(r.family) + '</div>' +
+        '<div class="meta">For ' + mShort(r.for_month) + ', ' + esc(r.method) + (r.txn ? ' ' + esc(r.txn) : '') + '</div>' +
+        '<div class="meta">' + niceDate(r.received_on) + (r.received_by ? ', received by ' + esc(r.received_by) : '') + '</div></div>' +
+        '<div class="money"><b>' + tk(r.amount) + '</b>' +
+        (late ? '<span class="pill late">Late</span>' : part ? '<span class="pill part">Partial</span>' : '<span class="pill ok">On time</span>') + '</div></div>';
+    }).join('') : '<div class="empty">No payments yet. Tap a family on the Families tab to add the first one.</div>';
+    $('fundTotal').textContent = tk(S.d.deposits.reduce(function (s, x) { return s + Number(x.amount); }, 0));
+  }
+
+  function openSheet(i) {
+    S.fam = S.d.families[i];
+    var x = famInfo(S.fam);
+    $('shName').textContent = S.fam.name;
+    $('shSub').textContent = mLong(month()) + ', ' + S.fam.members + ' x ' + tk(S.d.rate);
+    $('lgDue').textContent = tk(x.due); $('lgPaid').textContent = tk(x.paid);
+    $('lgRem').textContent = x.rem ? tk(x.rem) : 'None';
+    $('lgRemBox').classList.toggle('zero', !x.rem);
+    $('fullAmt').textContent = tk(x.rem || x.due);
     $('amount').value = ''; $('txn').value = ''; $('notes').value = '';
-    $('by').value = S.d.treasurer || 'Nabil';
-    setMethod(''); setPay(''); updateDue(); err('formErr', '');
+    show('notes', false); show('noteBtn', true); show('by', false); show('byEdit', true);
+    $('by').value = S.d.treasurer || 'Nabil'; $('byShow').textContent = $('by').value;
+    setPay(''); setMethod(''); setDate('today'); errOn('sheetErr', '');
+    $('scrim').classList.add('open'); $('sheet').classList.add('open'); $('sheet').scrollTop = 0;
   }
-
-  function setMethod(m) {
-    S.method = m;
-    Array.prototype.forEach.call($('methods').children, function (b) { b.classList.toggle('on', b.getAttribute('data-m') === m); });
-    show('txnWrap', m !== 'Cash' && m !== '');
-  }
+  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); }
 
   function setPay(t) {
     S.pay = t;
-    $('ptFull').classList.toggle('on', t === 'full');
-    $('ptPartial').classList.toggle('on', t === 'partial');
-    show('partialWrap', t === 'partial');
-    if (t === 'partial') setTimeout(function () { $('amount').focus(); }, 50);
+    $('ptFull').classList.toggle('on', t === 'full'); $('ptPart').classList.toggle('on', t === 'partial');
+    show('partWrap', t === 'partial');
+    if (t === 'partial') setTimeout(function () { $('amount').focus(); }, 60);
+    updateSave();
   }
-
-  function fam(name) { for (var i = 0; i < S.d.families.length; i++) if (S.d.families[i].name === name) return S.d.families[i]; return null; }
-
-  // due, already paid and remaining for the selected family and month
-  function dueInfo() {
-    var f = fam($('family').value); if (!f) return null;
-    var due = f.members * S.d.rate, paid = paidBy(f.name, $('month').value);
-    var rem = Math.max(0, due - paid);
-    return { f: f, due: due, paid: paid, rem: rem, full: rem > 0 ? rem : due };
+  function setMethod(m) {
+    S.method = m;
+    each($('methods').children, function (b) { b.classList.toggle('on', b.getAttribute('data-m') === m); });
+    show('txn', !!m && m !== 'Cash');
+    updateSave();
   }
-
-  function updateDue() {
-    var x = dueInfo();
-    show('dueBox', !!x);
-    if (!x) { $('fullAmt').textContent = ''; return; }
-    $('dueLabel').textContent = 'Due for ' + monthLabel($('month').value) + ' (' + x.f.members + ' x ' + S.d.rate + ')';
-    $('dueAmt').textContent = fmt(x.due) + ' taka';
-    show('paidRow', x.paid > 0); show('remRow', x.paid > 0);
-    $('alreadyAmt').textContent = fmt(x.paid) + ' taka';
-    $('remAmt').textContent = x.rem > 0 ? fmt(x.rem) + ' taka' : 'Fully paid';
-    $('fullAmt').textContent = fmt(x.full) + ' taka';
+  function setDate(k) {
+    each($('dates').children, function (b) { b.classList.toggle('on', b.getAttribute('data-d') === k); });
+    show('date', k === 'pick');
+    if (k === 'today') S.date = todayIso();
+    else if (k === 'yday') S.date = ydayIso();
+    else { if (!$('date').value) $('date').value = todayIso(); S.date = $('date').value; }
+    updateSave();
   }
-
-  function isLate(dateIso, monthIso) { return dateIso > monthIso.slice(0, 8) + pad(S.d.deadline); }
-
-  function review() {
-    err('formErr', '');
-    var x = dueInfo();
-    if (!$('date').value) return err('formErr', 'Pick the date it was received.');
-    if (!x) return err('formErr', 'Pick a family.');
-    if (!S.pay) return err('formErr', 'Tap Full paid or Partial.');
-    var amount = S.pay === 'full' ? x.full : Number($('amount').value);
-    if (!(amount > 0)) return err('formErr', 'Write the amount paid.');
-    if (!S.method) return err('formErr', 'Pick how it was paid.');
-    var e = {
-      received_on: $('date').value, family: x.f.name, for_month: $('month').value,
-      persons: x.f.members, amount: amount, method: S.method,
-      txn: S.method === 'Cash' ? '' : $('txn').value.trim(), received_by: $('by').value.trim(),
-      notes: [S.pay === 'partial' ? 'Partial' : '', $('notes').value.trim()].filter(Boolean).join('. ')
-    };
-    S.pending = e;
-    var late = isLate(e.received_on, e.for_month);
-    var after = Math.max(0, x.due - x.paid - amount);
-    $('cAmount').textContent = fmt(e.amount) + ' taka';
-    var rows = [
-      ['Family', esc(e.family) + ' (' + e.persons + ')'], ['For month', monthLabel(e.for_month)],
-      ['Payment', S.pay === 'full' ? 'Full paid' : 'Partial'],
-      ['Still due after this', after > 0 ? fmt(after) + ' taka' : 'Nothing'],
-      ['Paid by', esc(e.method + (e.txn ? ' (' + e.txn + ')' : ''))], ['Date received', niceDate(e.received_on)],
-      ['Status', late ? '<span class="tag late">Late</span>' : '<span class="tag ok">On time</span>'],
-      ['Received by', esc(e.received_by || '-')]
-    ];
-    if ($('notes').value.trim()) rows.push(['Notes', esc($('notes').value.trim())]);
-    $('cList').innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
-    err('saveErr', ''); show('form', false); show('confirm', true); window.scrollTo(0, 0);
+  function amountNow() { if (!S.fam) return 0; var x = famInfo(S.fam); return S.pay === 'full' ? (x.rem || x.due) : Number($('amount').value) || 0; }
+  function updateSave() {
+    var a = amountNow(), b = $('saveBtn');
+    b.disabled = !(S.pay && a > 0 && S.method && S.date) || S.busy;
+    if (!S.pay) { b.textContent = 'Choose full or partial'; return; }
+    if (!(a > 0)) { b.textContent = 'Type the amount'; return; }
+    if (!S.method) { b.textContent = 'Choose how it was paid'; return; }
+    var late = isLate(S.date, month());
+    b.innerHTML = 'Save ' + tk(a) + ' from ' + esc(S.fam.name) + '<small>' + esc(S.method) + ', ' + niceDate(S.date) + (late ? ', after the deadline' : '') + '</small>';
   }
 
   function save() {
-    $('saveBtn').disabled = true; $('saveBtn').textContent = 'Saving...';
-    rpc('pf_add', { p_pw: S.pw, p: S.pending }).then(function (d) {
-      $('saveBtn').disabled = false; $('saveBtn').textContent = 'Save deposit';
-      S.d = d; S.savedId = d.saved_id;
-      $('doneText').textContent = fmt(S.pending.amount) + ' taka from ' + S.pending.family + ' saved';
-      err('undoErr', ''); show('undoBtn', true); show('confirm', false); show('done', true); render();
-    }).catch(function (e) {
-      $('saveBtn').disabled = false; $('saveBtn').textContent = 'Save deposit'; err('saveErr', e.message);
-    });
+    var a = amountNow(); if (!(a > 0) || !S.method || S.busy) return;
+    S.busy = true; $('saveBtn').disabled = true; $('saveBtn').textContent = 'Saving...';
+    var p = {
+      received_on: S.date, for_month: month(), family: S.fam.name, persons: S.fam.members, amount: a, method: S.method,
+      txn: S.method === 'Cash' ? '' : $('txn').value.trim(), received_by: $('by').value.trim(),
+      notes: [S.pay === 'partial' ? 'Partial' : '', $('notes').value.trim()].filter(Boolean).join('. ')
+    };
+    rpc('pf_add', { p_pw: S.pw, p: p }).then(function (d) {
+      S.busy = false; S.d = d; S.savedId = d.saved_id;
+      closeSheet(); render(); toast('Saved ' + tk(a) + ' from ' + p.family, true);
+    }).catch(function (e) { S.busy = false; updateSave(); errOn('sheetErr', e.message); });
   }
 
+  var tTimer;
+  function toast(text, undoable) {
+    $('toastText').textContent = text; show('undoBtn', !!undoable);
+    $('toast').classList.add('show'); clearTimeout(tTimer);
+    tTimer = setTimeout(function () { $('toast').classList.remove('show'); }, 7000);
+  }
   function undo() {
     if (!S.savedId) return;
-    $('undoBtn').disabled = true;
     rpc('pf_undo', { p_pw: S.pw, p_id: S.savedId }).then(function (d) {
-      $('undoBtn').disabled = false; S.d = d; S.savedId = null;
-      $('doneText').textContent = 'Entry removed'; show('undoBtn', false); render();
-    }).catch(function (e) { $('undoBtn').disabled = false; err('undoErr', e.message); });
+      S.d = d; S.savedId = null; render(); toast('Payment removed', false);
+    }).catch(function (e) { toast(e.message, false); });
   }
 
-  function paidBy(family, month) {
-    var t = 0;
-    S.d.deposits.forEach(function (x) { if (x.family === family && x.for_month === month) t += Number(x.amount); });
-    return t;
-  }
-
-  function render() {
-    var d = S.d, m = $('sMonthSel').value;
-    $('sMonth').textContent = monthLabel(m);
-    var got = 0, due = 0, passed = todayIso() > m.slice(0, 8) + pad(d.deadline);
-    $('sList').innerHTML = d.families.map(function (f) {
-      var need = f.members * d.rate, paid = paidBy(f.name, m); got += paid; due += need;
-      var tag = paid >= need ? '<span class="tag ok">Paid ' + fmt(paid) + '</span>'
-        : paid > 0 ? '<span class="tag part">' + fmt(paid) + ' of ' + fmt(need) + '</span>'
-        : passed ? '<span class="tag late">Due ' + fmt(need) + '</span>'
-        : '<span style="color:var(--muted);font-size:13px">' + fmt(need) + ' due</span>';
-      return '<li><span>' + esc(f.name) + ' <small style="color:var(--muted)">(' + f.members + ')</small></span>' + tag + '</li>';
-    }).join('');
-    $('sGot').textContent = fmt(got) + ' taka'; $('sDue').textContent = fmt(due) + ' taka';
-    var total = d.deposits.reduce(function (s, x) { return s + Number(x.amount); }, 0);
-    $('fundTotal').textContent = fmt(total) + ' taka';
-    var rec = d.deposits.slice(-10).reverse();
-    $('recent').innerHTML = rec.length ? rec.map(function (r) {
-      var late = isLate(r.received_on, r.for_month);
-      return '<div><b>' + esc(r.family) + '</b> &middot; ' + fmt(r.amount) + ' taka &middot; ' + esc(r.method) +
-        (late ? ' <span class="tag late">Late</span>' : '') +
-        '<small>' + niceDate(r.received_on) + ' for ' + monthLabel(r.for_month) + (r.received_by ? ', received by ' + esc(r.received_by) : '') + '</small></div>';
-    }).join('') : '<p style="color:var(--muted);margin:0">No deposits yet.</p>';
-  }
-
-  function toDate(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-
+  function toDate(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
   function excel() {
-    if (!window.XLSX) { alert('Excel tool is still loading. Try again in a moment.'); return; }
-    var d = S.d;
-    var head = ['Family', 'Members', 'Monthly due', 'Paid total'].concat(d.months.map(monthLabel));
-    var rows = [head];
+    if (!window.XLSX) { toast('Excel is still loading. Try again in a moment.', false); return; }
+    var d = S.d, head = ['Family', 'Members', 'Monthly due', 'Paid total'].concat(d.months.map(mShort)), rows = [head];
     d.families.forEach(function (f) {
-      var r = [f.name, f.members, f.members * d.rate, 0];
-      var tot = 0;
+      var r = [f.name, f.members, f.members * d.rate, 0], tot = 0;
       d.months.forEach(function (m) { var p = paidBy(f.name, m); tot += p; r.push(p); });
       r[3] = tot; rows.push(r);
     });
-    var tr = ['Total', 0, 0, 0];
+    var tr = ['Total'];
     for (var c = 1; c < head.length; c++) tr[c] = rows.slice(1).reduce(function (s, r) { return s + r[c]; }, 0);
     rows.push(tr);
     var ws1 = XLSX.utils.aoa_to_sheet(rows);
     ws1['!cols'] = [{ wch: 14 }, { wch: 9 }, { wch: 12 }, { wch: 11 }].concat(d.months.map(function () { return { wch: 10 }; }));
-
     var dep = [['ID', 'Date received', 'For month', 'Family', 'Persons', 'Amount (taka)', 'Method', 'Transaction ID', 'Received by', 'Status', 'Notes', 'Entered at']];
     d.deposits.forEach(function (x) {
-      dep.push([x.id, toDate(x.received_on), monthLabel(x.for_month), x.family, x.persons, Number(x.amount), x.method,
-        x.txn || '', x.received_by || '', isLate(x.received_on, x.for_month) ? 'Late' : 'On time', x.notes || '',
-        new Date(x.created_at).toLocaleString('en-GB')]);
+      dep.push([x.id, toDate(x.received_on), mShort(x.for_month), x.family, x.persons, Number(x.amount), x.method, x.txn || '', x.received_by || '',
+        isLate(x.received_on, x.for_month) ? 'Late' : 'On time', x.notes || '', new Date(x.created_at).toLocaleString('en-GB')]);
     });
     var ws2 = XLSX.utils.aoa_to_sheet(dep, { cellDates: true, dateNF: 'dd mmm yyyy' });
     ws2['!cols'] = [6, 13, 10, 14, 8, 12, 12, 16, 14, 9, 24, 18].map(function (w) { return { wch: w }; });
-
     var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
-    XLSX.utils.book_append_sheet(wb, ws2, 'Deposits');
+    XLSX.utils.book_append_sheet(wb, ws1, 'Summary'); XLSX.utils.book_append_sheet(wb, ws2, 'Deposits');
     XLSX.writeFile(wb, 'Picnic-Fund-' + todayIso() + '.xlsx');
   }
 
   $('loginBtn').onclick = login;
   $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
   $('outBtn').onclick = logout;
-  $('family').onchange = function () { updateDue(); };
-  $('month').onchange = function () { updateDue(); };
+  $('prevM').onclick = function () { if (S.mi > 0) { S.mi--; render(); } };
+  $('nextM').onclick = function () { if (S.mi < S.d.months.length - 1) { S.mi++; render(); } };
+  each(document.querySelectorAll('.tabs button'), function (b) {
+    b.onclick = function () {
+      each(document.querySelectorAll('.tabs button'), function (x) { x.classList.toggle('on', x === b); });
+      show('tabAdd', b.getAttribute('data-tab') === 'tabAdd'); show('tabRec', b.getAttribute('data-tab') === 'tabRec');
+      window.scrollTo(0, 0);
+    };
+  });
+  $('scrim').onclick = closeSheet; $('closeBtn').onclick = closeSheet;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
   $('ptFull').onclick = function () { setPay('full'); };
-  $('ptPartial').onclick = function () { setPay('partial'); };
-  $('reviewBtn').onclick = review;
-  $('editBtn').onclick = function () { show('confirm', false); show('form', true); };
+  $('ptPart').onclick = function () { setPay('partial'); };
+  $('amount').oninput = updateSave;
+  each($('dates').children, function (b) { b.onclick = function () { setDate(b.getAttribute('data-d')); }; });
+  $('date').onchange = function () { S.date = $('date').value; updateSave(); };
+  $('byEdit').onclick = function () { show('by', true); show('byEdit', false); $('by').focus(); };
+  $('by').oninput = function () { $('byShow').textContent = $('by').value; };
+  $('noteBtn').onclick = function () { show('notes', true); show('noteBtn', false); $('notes').focus(); };
   $('saveBtn').onclick = save;
-  $('againBtn').onclick = function () { resetForm(); show('done', false); show('form', true); window.scrollTo(0, 0); };
   $('undoBtn').onclick = undo;
-  $('sMonthSel').onchange = render;
   $('xlsBtn').onclick = excel;
 
   var saved = load('pf_pw');
-  if (saved) { $('pw').value = saved; show('login', false); show('loading', true); login(); }
+  if (saved) { $('pw').value = saved; show('loginView', false); show('loadingView', true); login(); }
 </script>
 </body>
 </html>
