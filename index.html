@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F4E3D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Picnic Fund">
+<title>Family Picnic Fund</title>
+<style>
+  :root {
+    --green: #1F4E3D; --green-2: #2E6B53; --bg: #F4F6F3; --card: #fff;
+    --text: #1d2420; --muted: #66706a; --line: #dfe4df;
+    --ok: #DCEFD6; --ok-t: #256B2E; --part: #FFF1CC; --part-t: #8A6200;
+    --due: #F8D7D5; --due-t: #9B1C1C;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+         background: var(--bg); color: var(--text); font-size: 16px; }
+  header { background: var(--green); color: #fff; padding: 18px 16px 16px; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 650; }
+  header p { margin: 4px 0 0; opacity: .8; font-size: 13px; }
+  main { max-width: 520px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea { width: 100%; font: inherit; padding: 12px; border: 1px solid var(--line);
+          border-radius: 10px; background: #fff; color: var(--text); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--green-2); border-color: transparent; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; min-width: 0; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 10px 16px;
+          font: inherit; font-size: 15px; cursor: pointer; color: var(--text); }
+  .chip.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .stepper button { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--line);
+          background: #fff; font-size: 20px; cursor: pointer; color: var(--text); }
+  .stepper input { text-align: center; }
+  .btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; font: inherit; font-weight: 650;
+         background: var(--green); color: #fff; cursor: pointer; margin-top: 18px; }
+  .btn.ghost { background: #fff; color: var(--green); border: 1px solid var(--green); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .err { background: var(--due); color: var(--due-t); border-radius: 10px; padding: 10px 12px;
+         font-size: 14px; margin-top: 12px; display: none; }
+  .confirm dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0; }
+  .confirm dt { color: var(--muted); font-size: 14px; }
+  .confirm dd { margin: 0; font-weight: 600; text-align: right; }
+  .big { font-size: 28px; font-weight: 700; text-align: center; margin: 4px 0 14px; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 650; }
+  .tag.ok { background: var(--ok); color: var(--ok-t); }
+  .tag.late { background: var(--due); color: var(--due-t); }
+  .tag.part { background: var(--part); color: var(--part-t); }
+  .success { text-align: center; }
+  .success .tick { width: 56px; height: 56px; border-radius: 50%; background: var(--ok); color: var(--ok-t);
+          display: grid; place-items: center; font-size: 30px; margin: 4px auto 10px; }
+  .status-list { list-style: none; padding: 0; margin: 0; }
+  .status-list li { display: flex; justify-content: space-between; align-items: center;
+          padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .status-list li:last-child { border-bottom: 0; }
+  .totals { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .totals b { color: var(--text); }
+  .recent { font-size: 14px; }
+  .recent div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .recent div:last-child { border-bottom: 0; }
+  .recent small { color: var(--muted); display: block; margin-top: 2px; }
+  .hidden { display: none !important; }
+  .center { text-align: center; color: var(--muted); padding: 40px 0; }
+  .link { background: none; border: 0; color: var(--green); font: inherit; font-size: 14px;
+          text-decoration: underline; cursor: pointer; padding: 0; }
+  .tools { display: flex; gap: 10px; }
+  .tools .btn { margin-top: 0; }
+  header .top { display: flex; justify-content: space-between; align-items: center; max-width: 520px; margin: 0 auto; }
+  header .out { background: rgba(255,255,255,.15); color: #fff; border: 0; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div>
+      <h1>Family Picnic Fund</h1>
+      <p id="sub">Monthly deposits</p>
+    </div>
+    <button class="out hidden" id="outBtn">Log out</button>
+  </div>
+</header>
+<main>
+  <section id="login" class="card">
+    <h2>Enter password</h2>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
+    <button class="btn" id="loginBtn">Open</button>
+    <div class="err" id="loginErr"></div>
+  </section>
+
+  <div id="loading" class="center hidden">Loading...</div>
+
+  <section id="form" class="card hidden">
+    <h2>New deposit</h2>
+    <label for="date">Date received</label>
+    <input id="date" type="date">
+    <label for="family">Family</label>
+    <select id="family"></select>
+    <label for="month">For month</label>
+    <select id="month"></select>
+    <div class="row">
+      <div>
+        <label>Persons</label>
+        <div class="stepper">
+          <button type="button" id="pMinus">&minus;</button>
+          <input id="persons" type="number" inputmode="numeric" min="1" max="20">
+          <button type="button" id="pPlus">+</button>
+        </div>
+      </div>
+      <div>
+        <label for="amount">Amount (taka)</label>
+        <input id="amount" type="number" inputmode="numeric" min="1">
+      </div>
+    </div>
+    <div class="hint" id="calc"></div>
+    <label>Paid by</label>
+    <div class="chips" id="methods"></div>
+    <div id="txnWrap">
+      <label for="txn">Transaction ID (optional)</label>
+      <input id="txn" type="text" placeholder="e.g. bKash TrxID">
+    </div>
+    <label for="by">Received by</label>
+    <input id="by" type="text" placeholder="Name">
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" rows="2"></textarea>
+    <button class="btn" id="reviewBtn">Check and save</button>
+    <div class="err" id="formErr"></div>
+  </section>
+
+  <section id="confirm" class="card confirm hidden">
+    <h2>Check before saving</h2>
+    <div class="big" id="cAmount"></div>
+    <dl id="cList"></dl>
+    <button class="btn" id="saveBtn">Save deposit</button>
+    <button class="btn ghost" id="editBtn">Go back and edit</button>
+    <div class="err" id="saveErr"></div>
+  </section>
+
+  <section id="done" class="card success hidden">
+    <div class="tick">&#10003;</div>
+    <h2 id="doneText">Saved</h2>
+    <button class="btn" id="againBtn">Add another</button>
+    <p><button class="link" id="undoBtn">Undo this entry</button></p>
+    <div class="err" id="undoErr"></div>
+  </section>
+
+  <section id="statusCard" class="card hidden">
+    <h2>Status for <span id="sMonth"></span></h2>
+    <select id="sMonthSel" style="margin-bottom:12px"></select>
+    <div class="totals"><span>Collected <b id="sGot"></b></span><span>of <b id="sDue"></b></span></div>
+    <ul class="status-list" id="sList"></ul>
+    <div class="totals" style="margin-top:14px;margin-bottom:0"><span>Total fund so far</span><b id="fundTotal"></b></div>
+  </section>
+
+  <section id="toolsCard" class="card hidden">
+    <h2>Excel</h2>
+    <div class="tools">
+      <button class="btn" id="xlsBtn">Download Excel</button>
+    </div>
+    <div class="hint">Includes a Summary sheet and every deposit.</div>
+  </section>
+
+  <section id="recentCard" class="card hidden">
+    <h2>Recent entries</h2>
+    <div class="recent" id="recent"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+  var API = 'https://lmvcjdqdbtczqkunuvuv.supabase.co/rest/v1/rpc/';
+  var KEY = 'sb_publishable_kyg2uy9TmKa2BzTNLhRPRw_BcsPgJT9';
+  var MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var S = { pw: '', d: null, method: '', pending: null, savedId: null };
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id, on) { $(id).classList.toggle('hidden', !on); }
+  function err(id, m) { var el = $(id); el.textContent = m || ''; el.style.display = m ? 'block' : 'none'; }
+  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function todayIso() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function niceDate(iso) { var p = iso.split('-'); return Number(p[2]) + ' ' + MN[Number(p[1]) - 1] + ' ' + p[0]; }
+  function monthLabel(iso) { var p = iso.split('-'); return MN[Number(p[1]) - 1] + ' ' + p[0]; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function rpc(fn, body) {
+    return fetch(API + fn, {
+      method: 'POST',
+      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Server error (' + r.status + '). Try again.');
+      return r.json();
+    }).then(function (j) {
+      if (j && j.error) throw new Error(j.error);
+      return j;
+    }, function (e) {
+      throw new Error(e.message && e.message.indexOf('Server error') === 0 ? e.message : (e.message || 'No connection. Check internet and try again.'));
+    });
+  }
+
+  function login() {
+    var pw = $('pw').value;
+    if (!pw) return;
+    err('loginErr', ''); $('loginBtn').disabled = true;
+    rpc('pf_get', { p_pw: pw }).then(function (d) {
+      S.pw = pw; store('pf_pw', pw); $('loginBtn').disabled = false;
+      show('login', false); start(d);
+    }).catch(function (e) {
+      $('loginBtn').disabled = false; store('pf_pw', null);
+      show('loading', false); show('login', true); err('loginErr', e.message);
+    });
+  }
+
+  function logout() {
+    store('pf_pw', null); S.pw = ''; $('pw').value = '';
+    ['form','confirm','done','statusCard','toolsCard','recentCard','outBtn'].forEach(function (id) { show(id, false); });
+    show('login', true);
+  }
+
+  function start(d) {
+    S.d = d;
+    $('sub').textContent = d.rate + ' taka per person, due by the ' + d.deadline + 'th';
+    $('family').innerHTML = '<option value="">Select family</option>' +
+      d.families.map(function (f) { return '<option>' + esc(f.name) + '</option>'; }).join('');
+    var opts = d.months.map(function (m) { return '<option value="' + m + '">' + monthLabel(m) + '</option>'; }).join('');
+    $('month').innerHTML = opts; $('sMonthSel').innerHTML = opts;
+    $('methods').innerHTML = d.methods.map(function (m) {
+      return '<button type="button" class="chip" data-m="' + esc(m) + '">' + esc(m) + '</button>';
+    }).join('');
+    Array.prototype.forEach.call($('methods').children, function (b) {
+      b.onclick = function () { setMethod(b.getAttribute('data-m')); };
+    });
+    resetForm();
+    $('sMonthSel').value = currentMonth();
+    show('loading', false);
+    ['form','statusCard','toolsCard','recentCard','outBtn'].forEach(function (id) { show(id, true); });
+    render();
+  }
+
+  function currentMonth() {
+    var t = todayIso().slice(0, 8) + '01';
+    return S.d.months.indexOf(t) >= 0 ? t : S.d.months[0];
+  }
+
+  function resetForm() {
+    $('date').value = todayIso(); $('family').value = ''; $('month').value = currentMonth();
+    $('persons').value = ''; $('amount').value = ''; $('calc').textContent = '';
+    $('txn').value = ''; $('notes').value = '';
+    $('by').value = load('pf_by') || S.d.treasurer || '';
+    setMethod(''); err('formErr', '');
+  }
+
+  function setMethod(m) {
+    S.method = m;
+    Array.prototype.forEach.call($('methods').children, function (b) { b.classList.toggle('on', b.getAttribute('data-m') === m); });
+    show('txnWrap', m !== 'Cash');
+  }
+
+  function fam(name) { for (var i = 0; i < S.d.families.length; i++) if (S.d.families[i].name === name) return S.d.families[i]; return null; }
+  function recalc() { var p = Number($('persons').value) || 0; $('amount').value = p ? p * S.d.rate : ''; updateCalc(); }
+  function updateCalc() {
+    var p = Number($('persons').value) || 0, a = Number($('amount').value) || 0;
+    if (!p) { $('calc').textContent = ''; return; }
+    var exp = p * S.d.rate;
+    $('calc').textContent = p + ' x ' + S.d.rate + ' = ' + fmt(exp) + ' taka' + (a && a !== exp ? '  (entered ' + fmt(a) + ')' : '');
+  }
+  function isLate(dateIso, monthIso) { return dateIso > monthIso.slice(0, 8) + pad(S.d.deadline); }
+
+  function review() {
+    err('formErr', '');
+    var e = {
+      received_on: $('date').value, family: $('family').value, for_month: $('month').value,
+      persons: Number($('persons').value), amount: Number($('amount').value), method: S.method,
+      txn: S.method === 'Cash' ? '' : $('txn').value.trim(), received_by: $('by').value.trim(), notes: $('notes').value.trim()
+    };
+    if (!e.received_on) return err('formErr', 'Pick the date it was received.');
+    if (!e.family) return err('formErr', 'Pick a family.');
+    if (!(e.persons >= 1 && e.persons <= 20)) return err('formErr', 'Enter how many persons.');
+    if (!(e.amount > 0)) return err('formErr', 'Enter the amount.');
+    if (!e.method) return err('formErr', 'Pick how it was paid.');
+    S.pending = e;
+    var late = isLate(e.received_on, e.for_month);
+    $('cAmount').textContent = fmt(e.amount) + ' taka';
+    var rows = [
+      ['Family', esc(e.family)], ['For month', monthLabel(e.for_month)], ['Persons', e.persons],
+      ['Paid by', esc(e.method + (e.txn ? ' (' + e.txn + ')' : ''))], ['Date received', niceDate(e.received_on)],
+      ['Status', late ? '<span class="tag late">Late</span>' : '<span class="tag ok">On time</span>'],
+      ['Received by', esc(e.received_by || '-')]
+    ];
+    if (e.amount !== e.persons * S.d.rate) rows.push(['Expected', fmt(e.persons * S.d.rate) + ' taka']);
+    if (e.notes) rows.push(['Notes', esc(e.notes)]);
+    $('cList').innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
+    err('saveErr', ''); show('form', false); show('confirm', true); window.scrollTo(0, 0);
+  }
+
+  function save() {
+    $('saveBtn').disabled = true; $('saveBtn').textContent = 'Saving...';
+    rpc('pf_add', { p_pw: S.pw, p: S.pending }).then(function (d) {
+      $('saveBtn').disabled = false; $('saveBtn').textContent = 'Save deposit';
+      S.d = d; S.savedId = d.saved_id; store('pf_by', S.pending.received_by);
+      $('doneText').textContent = fmt(S.pending.amount) + ' taka from ' + S.pending.family + ' saved';
+      err('undoErr', ''); show('undoBtn', true); show('confirm', false); show('done', true); render();
+    }).catch(function (e) {
+      $('saveBtn').disabled = false; $('saveBtn').textContent = 'Save deposit'; err('saveErr', e.message);
+    });
+  }
+
+  function undo() {
+    if (!S.savedId) return;
+    $('undoBtn').disabled = true;
+    rpc('pf_undo', { p_pw: S.pw, p_id: S.savedId }).then(function (d) {
+      $('undoBtn').disabled = false; S.d = d; S.savedId = null;
+      $('doneText').textContent = 'Entry removed'; show('undoBtn', false); render();
+    }).catch(function (e) { $('undoBtn').disabled = false; err('undoErr', e.message); });
+  }
+
+  function paidBy(family, month) {
+    var t = 0;
+    S.d.deposits.forEach(function (x) { if (x.family === family && x.for_month === month) t += Number(x.amount); });
+    return t;
+  }
+
+  function render() {
+    var d = S.d, m = $('sMonthSel').value;
+    $('sMonth').textContent = monthLabel(m);
+    var got = 0, due = 0, passed = todayIso() > m.slice(0, 8) + pad(d.deadline);
+    $('sList').innerHTML = d.families.map(function (f) {
+      var need = f.members * d.rate, paid = paidBy(f.name, m); got += paid; due += need;
+      var tag = paid >= need ? '<span class="tag ok">Paid ' + fmt(paid) + '</span>'
+        : paid > 0 ? '<span class="tag part">' + fmt(paid) + ' of ' + fmt(need) + '</span>'
+        : passed ? '<span class="tag late">Due ' + fmt(need) + '</span>'
+        : '<span style="color:var(--muted);font-size:13px">' + fmt(need) + ' due</span>';
+      return '<li><span>' + esc(f.name) + ' <small style="color:var(--muted)">(' + f.members + ')</small></span>' + tag + '</li>';
+    }).join('');
+    $('sGot').textContent = fmt(got) + ' taka'; $('sDue').textContent = fmt(due) + ' taka';
+    var total = d.deposits.reduce(function (s, x) { return s + Number(x.amount); }, 0);
+    $('fundTotal').textContent = fmt(total) + ' taka';
+    var rec = d.deposits.slice(-10).reverse();
+    $('recent').innerHTML = rec.length ? rec.map(function (r) {
+      var late = isLate(r.received_on, r.for_month);
+      return '<div><b>' + esc(r.family) + '</b> &middot; ' + fmt(r.amount) + ' taka &middot; ' + esc(r.method) +
+        (late ? ' <span class="tag late">Late</span>' : '') +
+        '<small>' + niceDate(r.received_on) + ' for ' + monthLabel(r.for_month) + (r.received_by ? ', received by ' + esc(r.received_by) : '') + '</small></div>';
+    }).join('') : '<p style="color:var(--muted);margin:0">No deposits yet.</p>';
+  }
+
+  function toDate(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+
+  function excel() {
+    if (!window.XLSX) { alert('Excel tool is still loading. Try again in a moment.'); return; }
+    var d = S.d;
+    var head = ['Family', 'Members', 'Monthly due', 'Paid total'].concat(d.months.map(monthLabel));
+    var rows = [head];
+    d.families.forEach(function (f) {
+      var r = [f.name, f.members, f.members * d.rate, 0];
+      var tot = 0;
+      d.months.forEach(function (m) { var p = paidBy(f.name, m); tot += p; r.push(p); });
+      r[3] = tot; rows.push(r);
+    });
+    var tr = ['Total', 0, 0, 0];
+    for (var c = 1; c < head.length; c++) tr[c] = rows.slice(1).reduce(function (s, r) { return s + r[c]; }, 0);
+    rows.push(tr);
+    var ws1 = XLSX.utils.aoa_to_sheet(rows);
+    ws1['!cols'] = [{ wch: 14 }, { wch: 9 }, { wch: 12 }, { wch: 11 }].concat(d.months.map(function () { return { wch: 10 }; }));
+
+    var dep = [['ID', 'Date received', 'For month', 'Family', 'Persons', 'Amount (taka)', 'Method', 'Transaction ID', 'Received by', 'Status', 'Notes', 'Entered at']];
+    d.deposits.forEach(function (x) {
+      dep.push([x.id, toDate(x.received_on), monthLabel(x.for_month), x.family, x.persons, Number(x.amount), x.method,
+        x.txn || '', x.received_by || '', isLate(x.received_on, x.for_month) ? 'Late' : 'On time', x.notes || '',
+        new Date(x.created_at).toLocaleString('en-GB')]);
+    });
+    var ws2 = XLSX.utils.aoa_to_sheet(dep, { cellDates: true, dateNF: 'dd mmm yyyy' });
+    ws2['!cols'] = [6, 13, 10, 14, 8, 12, 12, 16, 14, 9, 24, 18].map(function (w) { return { wch: w }; });
+
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Deposits');
+    XLSX.writeFile(wb, 'Picnic-Fund-' + todayIso() + '.xlsx');
+  }
+
+  $('loginBtn').onclick = login;
+  $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
+  $('outBtn').onclick = logout;
+  $('family').onchange = function () { var f = fam($('family').value); $('persons').value = f ? f.members : ''; recalc(); };
+  $('persons').oninput = recalc;
+  $('amount').oninput = updateCalc;
+  $('pMinus').onclick = function () { var v = Number($('persons').value) || 1; $('persons').value = Math.max(1, v - 1); recalc(); };
+  $('pPlus').onclick = function () { var v = Number($('persons').value) || 0; $('persons').value = Math.min(20, v + 1); recalc(); };
+  $('reviewBtn').onclick = review;
+  $('editBtn').onclick = function () { show('confirm', false); show('form', true); };
+  $('saveBtn').onclick = save;
+  $('againBtn').onclick = function () { resetForm(); show('done', false); show('form', true); window.scrollTo(0, 0); };
+  $('undoBtn').onclick = undo;
+  $('sMonthSel').onchange = render;
+  $('xlsBtn').onclick = excel;
+
+  var saved = load('pf_pw');
+  if (saved) { $('pw').value = saved; show('login', false); show('loading', true); login(); }
+</script>
+</body>
+</html>

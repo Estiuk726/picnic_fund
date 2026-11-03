@@ -1,0 +1,13 @@
+name: Keep database awake
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -fsS -X POST "https://lmvcjdqdbtczqkunuvuv.supabase.co/rest/v1/rpc/pf_ping" \
+            -H "apikey: sb_publishable_kyg2uy9TmKa2BzTNLhRPRw_BcsPgJT9" \
+            -H "Content-Type: application/json" -d '{}'
