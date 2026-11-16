@@ -129,6 +129,19 @@
   .save small { display: block; font-weight: 400; font-size: 13px; opacity: .85; }
   .err { background: var(--chili-lt); color: var(--chili); border-radius: var(--r-md); padding: 10px 12px; font-size: 14px; margin-top: 12px; }
 
+  .fam-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .fam-row:last-child { border-bottom: 0; }
+  .fam-row .who { flex: 1; font-weight: 600; }
+  .fam-row .who small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+  .add-btn { width: 100%; border: 1.5px dashed var(--leaf-mid); background: #fff; color: var(--leaf); border-radius: var(--r-md); padding: 13px; font-weight: 600; font-size: 16px; margin-bottom: 10px; }
+  .sub-h { font-size: 15px; color: var(--muted); margin: 22px 2px 8px; font-weight: 600; }
+  .stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper button { width: 48px; height: 48px; border-radius: var(--r-md); border: 1.5px solid var(--line); background: #fff; font-size: 22px; }
+  .stepper input { width: 80px; text-align: center; font-size: 20px; font-weight: 600; }
+  .stepper .due { color: var(--muted); font-size: 14px; }
+  .danger { width: 100%; border: 1.5px solid #E8A898; background: #fff; color: var(--chili); border-radius: var(--r-md); padding: 12px; font-weight: 600; font-size: 16px; margin-top: 10px; }
+  .danger.solid { background: var(--chili); border-color: var(--chili); color: #fff; }
+  .warn { background: var(--chili-lt); border-radius: var(--r-md); padding: 12px; font-size: 14px; margin-top: 12px; }
   .login { max-width: 380px; margin: 14vh auto 0; padding: 0 20px; text-align: center; }
   .login h1 { font-size: 32px; margin: 0; color: var(--leaf); }
   .login p { color: var(--muted); margin: 0 0 22px; }
@@ -190,11 +203,21 @@
       <div class="list" id="recList"></div>
       <div class="total-line"><span>Total fund so far</span><b id="fundTotal"></b></div>
     </section>
+    <section id="tabFam" class="hidden">
+      <div class="section-h"><h2>Manage families</h2></div>
+      <button class="add-btn" id="addFamBtn">+ Add a family</button>
+      <div class="list" id="famList"></div>
+      <div id="removedWrap" class="hidden">
+        <div class="sub-h">Removed</div>
+        <div class="list" id="removedList"></div>
+      </div>
+    </section>
   </main>
 
   <nav class="tabs">
     <button class="on" data-tab="tabAdd">Families</button>
     <button data-tab="tabRec">Records</button>
+    <button data-tab="tabFam">Manage</button>
   </nav>
 </div>
 
@@ -249,6 +272,32 @@
 
   <div class="err hidden" id="sheetErr"></div>
   <button class="save" id="saveBtn" disabled>Choose full or partial</button>
+</div>
+
+<div class="sheet" id="famSheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle">
+  <div class="grab"></div>
+  <div class="sh-head">
+    <div><h3 id="fsTitle">Add a family</h3><p id="fsSub"></p></div>
+    <button class="close" id="fsClose" aria-label="Close">&#10005;</button>
+  </div>
+  <span class="lbl">Family name</span>
+  <input id="fsName" class="field" type="text" maxlength="40" placeholder="e.g. Rafiq Chacha">
+  <span class="lbl">Members</span>
+  <div class="stepper">
+    <button type="button" id="fsMinus" aria-label="Fewer">&minus;</button>
+    <input id="fsMembers" class="field" type="number" inputmode="numeric" min="1" max="20">
+    <button type="button" id="fsPlus" aria-label="More">+</button>
+    <span class="due" id="fsDue"></span>
+  </div>
+  <div class="err hidden" id="fsErr"></div>
+  <button class="save" id="fsSave">Add family</button>
+  <div id="fsRemoveWrap">
+    <button class="danger" id="fsRemove">Remove from the list</button>
+    <div id="fsConfirm" class="hidden">
+      <div class="warn" id="fsWarn"></div>
+      <button class="danger solid" id="fsRemoveYes">Yes, remove</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"><span id="toastText"></span><button id="undoBtn">Undo</button></div>
@@ -334,9 +383,11 @@
       each(document.querySelectorAll('.tile .fill'), function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
     }); });
 
+    got = d.deposits.reduce(function (s, x) { return s + (x.for_month === m ? Number(x.amount) : 0); }, 0);
     $('mGot').textContent = tk(got); $('mDue').textContent = tk(due);
     $('mBar').style.width = (due ? Math.min(100, got / due * 100) : 0) + '%';
     renderRecords();
+    renderFamilies();
   }
 
   function renderRecords() {
@@ -367,7 +418,7 @@
     setPay(''); setMethod(''); setDate('today'); errOn('sheetErr', '');
     $('scrim').classList.add('open'); $('sheet').classList.add('open'); $('sheet').scrollTop = 0;
   }
-  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); }
+  function closeSheet() { $('scrim').classList.remove('open'); $('sheet').classList.remove('open'); $('famSheet').classList.remove('open'); }
 
   function setPay(t) {
     S.pay = t;
@@ -428,11 +479,70 @@
     }).catch(function (e) { toast(e.message, false); });
   }
 
+  /* Manage families */
+  var F = { old: '' };
+  function renderFamilies() {
+    var d = S.d, active = d.families, removed = d.removed_families || [];
+    $('famList').innerHTML = active.map(function (f, i) {
+      return '<div class="fam-row"><div class="who">' + esc(f.name) + '<small>' + f.members + (f.members > 1 ? ' people' : ' person') + ', ' + tk(f.members * d.rate) + ' a month</small></div>' +
+        '<button class="btn-sm" data-edit="' + i + '">Edit</button></div>';
+    }).join('') || '<div class="empty">No families yet.</div>';
+    each($('famList').querySelectorAll('[data-edit]'), function (b) { b.onclick = function () { openFam(active[Number(b.getAttribute('data-edit'))]); }; });
+    show('removedWrap', removed.length > 0);
+    $('removedList').innerHTML = removed.map(function (f, i) {
+      return '<div class="fam-row"><div class="who">' + esc(f.name) + '<small>' + f.members + (f.members > 1 ? ' people' : ' person') + '</small></div>' +
+        '<button class="btn-sm" data-restore="' + i + '">Add back</button></div>';
+    }).join('');
+    each($('removedList').querySelectorAll('[data-restore]'), function (b) {
+      b.onclick = function () {
+        var f = removed[Number(b.getAttribute('data-restore'))]; b.disabled = true;
+        rpc('pf_family_set', { p_pw: S.pw, p_name: f.name, p_active: true }).then(function (d) {
+          S.d = d; render(); toast(f.name + ' is back on the list', false);
+        }).catch(function (e) { b.disabled = false; toast(e.message, false); });
+      };
+    });
+  }
+  function openFam(f) {
+    F.old = f ? f.name : '';
+    $('fsTitle').textContent = f ? 'Edit ' + f.name : 'Add a family';
+    $('fsSub').textContent = f ? 'Change the name or number of members' : 'They will appear on the Families tab right away';
+    $('fsName').value = f ? f.name : ''; $('fsMembers').value = f ? f.members : 1;
+    $('fsSave').textContent = f ? 'Save changes' : 'Add family';
+    show('fsRemoveWrap', !!f); show('fsConfirm', false); show('fsRemove', true); errOn('fsErr', '');
+    fsDue();
+    $('scrim').classList.add('open'); $('famSheet').classList.add('open'); $('famSheet').scrollTop = 0;
+    if (!f) setTimeout(function () { $('fsName').focus(); }, 300);
+  }
+  function fsDue() { var m = Number($('fsMembers').value) || 0; $('fsDue').textContent = m ? tk(m * S.d.rate) + ' a month' : ''; }
+  function fsStep(k) { var m = (Number($('fsMembers').value) || 0) + k; $('fsMembers').value = Math.max(1, Math.min(20, m)); fsDue(); }
+  function fsSave() {
+    var name = $('fsName').value.trim(), m = Number($('fsMembers').value);
+    if (!name) return errOn('fsErr', 'Write the family name.');
+    if (!(m >= 1 && m <= 20)) return errOn('fsErr', 'Members must be between 1 and 20.');
+    $('fsSave').disabled = true;
+    rpc('pf_family_save', { p_pw: S.pw, p_old_name: F.old || null, p_name: name, p_members: m }).then(function (d) {
+      $('fsSave').disabled = false; S.d = d; closeSheet(); render();
+      toast(F.old ? 'Saved changes to ' + name : name + ' added', false);
+    }).catch(function (e) { $('fsSave').disabled = false; errOn('fsErr', e.message); });
+  }
+  function fsAskRemove() {
+    var paid = S.d.deposits.filter(function (x) { return x.family === F.old; }).reduce(function (s, x) { return s + Number(x.amount); }, 0);
+    $('fsWarn').textContent = F.old + ' will be taken off the list and will not owe anything from now on.' +
+      (paid ? ' Their ' + tk(paid) + ' already paid stays in the records and the fund total.' : '') + ' You can add them back later.';
+    show('fsRemove', false); show('fsConfirm', true);
+  }
+  function fsRemove() {
+    var name = F.old; $('fsRemoveYes').disabled = true;
+    rpc('pf_family_set', { p_pw: S.pw, p_name: name, p_active: false }).then(function (d) {
+      $('fsRemoveYes').disabled = false; S.d = d; closeSheet(); render(); toast(name + ' removed', false);
+    }).catch(function (e) { $('fsRemoveYes').disabled = false; errOn('fsErr', e.message); });
+  }
+
   function toDate(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
   function excel() {
     if (!window.XLSX) { toast('Excel is still loading. Try again in a moment.', false); return; }
     var d = S.d, head = ['Family', 'Members', 'Monthly due', 'Paid total'].concat(d.months.map(mShort)), rows = [head];
-    d.families.forEach(function (f) {
+    d.families.concat((d.removed_families || []).filter(function (f) { return d.deposits.some(function (x) { return x.family === f.name; }); })).forEach(function (f) {
       var r = [f.name, f.members, f.members * d.rate, 0], tot = 0;
       d.months.forEach(function (m) { var p = paidBy(f.name, m); tot += p; r.push(p); });
       r[3] = tot; rows.push(r);
@@ -462,7 +572,7 @@
   each(document.querySelectorAll('.tabs button'), function (b) {
     b.onclick = function () {
       each(document.querySelectorAll('.tabs button'), function (x) { x.classList.toggle('on', x === b); });
-      show('tabAdd', b.getAttribute('data-tab') === 'tabAdd'); show('tabRec', b.getAttribute('data-tab') === 'tabRec');
+      ['tabAdd', 'tabRec', 'tabFam'].forEach(function (t) { show(t, b.getAttribute('data-tab') === t); });
       window.scrollTo(0, 0);
     };
   });
@@ -477,6 +587,14 @@
   $('by').oninput = function () { $('byShow').textContent = $('by').value; };
   $('noteBtn').onclick = function () { show('notes', true); show('noteBtn', false); $('notes').focus(); };
   $('saveBtn').onclick = save;
+  $('addFamBtn').onclick = function () { openFam(null); };
+  $('fsClose').onclick = closeSheet;
+  $('fsMinus').onclick = function () { fsStep(-1); };
+  $('fsPlus').onclick = function () { fsStep(1); };
+  $('fsMembers').oninput = fsDue;
+  $('fsSave').onclick = fsSave;
+  $('fsRemove').onclick = fsAskRemove;
+  $('fsRemoveYes').onclick = fsRemove;
   $('undoBtn').onclick = undo;
   $('xlsBtn').onclick = excel;
 
