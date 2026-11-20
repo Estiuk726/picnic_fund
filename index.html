@@ -171,7 +171,7 @@
   <header class="top">
     <div class="wrap">
       <div class="top-row">
-        <span class="brand">Picnic Fund</span>
+        <span class="brand">Picnic Fund <small id="roleTag" style="font-weight:500;opacity:.75;font-size:.7em"></small></span>
         <button class="ghost-w" id="outBtn">Log out</button>
       </div>
       <div class="month">
@@ -217,7 +217,7 @@
   <nav class="tabs">
     <button class="on" data-tab="tabAdd">Families</button>
     <button data-tab="tabRec">Records</button>
-    <button data-tab="tabFam">Manage</button>
+    <button data-tab="tabFam" id="famTabBtn">Manage</button>
   </nav>
 </div>
 
@@ -345,7 +345,11 @@
   function logout() { store('pf_pw', null); S.pw = ''; $('pw').value = ''; closeSheet(); show('app', false); show('loginView', true); }
 
   function start(d) {
-    S.d = d;
+    S.d = d; S.role = d.role || 'admin';
+    var admin = S.role === 'admin';
+    $('roleTag').textContent = admin ? 'Admin' : 'Cashier';
+    show('famTabBtn', admin);
+    if (!admin) { show('tabFam', false); show('tabAdd', true); each(document.querySelectorAll('.tabs button'), function (x) { x.classList.toggle('on', x.getAttribute('data-tab') === 'tabAdd'); }); }
     var t = todayIso().slice(0, 8) + '01', i = d.months.indexOf(t);
     S.mi = i >= 0 ? i : (t < d.months[0] ? 0 : d.months.length - 1);
     $('methods').innerHTML = d.methods.map(function (m) { return '<button class="chip" data-m="' + esc(m) + '">' + esc(m) + '</button>'; }).join('');
@@ -413,7 +417,7 @@
     $('lgRemBox').classList.toggle('zero', !x.rem);
     $('fullAmt').textContent = tk(x.rem || x.due);
     $('amount').value = ''; $('txn').value = ''; $('notes').value = '';
-    show('notes', false); show('noteBtn', true); show('by', false); show('byEdit', true);
+    show('notes', false); show('noteBtn', true); show('by', false); show('byEdit', S.role === 'admin');
     $('by').value = S.d.treasurer || 'Nabil'; $('byShow').textContent = $('by').value;
     setPay(''); setMethod(''); setDate('today'); errOn('sheetErr', '');
     $('scrim').classList.add('open'); $('sheet').classList.add('open'); $('sheet').scrollTop = 0;
@@ -552,13 +556,13 @@
     rows.push(tr);
     var ws1 = XLSX.utils.aoa_to_sheet(rows);
     ws1['!cols'] = [{ wch: 14 }, { wch: 9 }, { wch: 12 }, { wch: 11 }].concat(d.months.map(function () { return { wch: 10 }; }));
-    var dep = [['ID', 'Date received', 'For month', 'Family', 'Persons', 'Amount (taka)', 'Method', 'Transaction ID', 'Received by', 'Status', 'Notes', 'Entered at']];
+    var dep = [['ID', 'Date received', 'For month', 'Family', 'Persons', 'Amount (taka)', 'Method', 'Transaction ID', 'Received by', 'Status', 'Notes', 'Entered at', 'Entered by']];
     d.deposits.forEach(function (x) {
       dep.push([x.id, toDate(x.received_on), mShort(x.for_month), x.family, x.persons, Number(x.amount), x.method, x.txn || '', x.received_by || '',
-        isLate(x.received_on, x.for_month) ? 'Late' : 'On time', x.notes || '', new Date(x.created_at).toLocaleString('en-GB')]);
+        isLate(x.received_on, x.for_month) ? 'Late' : 'On time', x.notes || '', new Date(x.created_at).toLocaleString('en-GB'), x.entered_by === 'cashier' ? 'Cashier' : 'Admin']);
     });
     var ws2 = XLSX.utils.aoa_to_sheet(dep, { cellDates: true, dateNF: 'dd mmm yyyy' });
-    ws2['!cols'] = [6, 13, 10, 14, 8, 12, 12, 16, 14, 9, 24, 18].map(function (w) { return { wch: w }; });
+    ws2['!cols'] = [6, 13, 10, 14, 8, 12, 12, 16, 14, 9, 24, 18, 10].map(function (w) { return { wch: w }; });
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws1, 'Summary'); XLSX.utils.book_append_sheet(wb, ws2, 'Deposits');
     XLSX.writeFile(wb, 'Picnic-Fund-' + todayIso() + '.xlsx');
