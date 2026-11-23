@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2F5D3A">
-<title>Picnic Fund Status</title>
+<title>Picnic Fund Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,47 +14,48 @@
     --turmeric: #E2A72E; --turmeric-lt: #FBEFD3;
     --chili: #C8462E; --chili-lt: #F8E1DB;
     --paper: #F7F9F5; --card: #FFFFFF; --ink: #1E2A22; --muted: #66746A; --line: #E1E7DF;
-    --r-md: 12px; --r-sm: 999px;
+    --r-md: 14px; --r-sm: 999px;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Hind Siliguri", system-ui, sans-serif; background: var(--paper); color: var(--ink);
          font-size: 16px; line-height: 1.4; padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
   button { font: inherit; color: inherit; }
   :focus-visible { outline: 3px solid var(--turmeric); outline-offset: 2px; }
-  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
   .hidden { display: none !important; }
-  .top { background: var(--leaf); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 0 22px; }
+  .top { background: var(--leaf); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 0 24px; }
   .brand { font-weight: 700; font-size: 18px; }
   .brand small { font-weight: 500; opacity: .75; font-size: .75em; }
-  .fund { margin-top: 14px; }
+  .fund { margin-top: 16px; }
   .fund span { font-size: 14px; opacity: .85; }
-  .fund b { display: block; font-size: 40px; line-height: 1.1; }
-  .month { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 0 6px; }
-  .month button { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card); font-size: 22px; line-height: 1; color: var(--leaf); }
+  .fund b { display: block; font-size: 44px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .fund small { font-size: 14px; opacity: .8; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 24px 2px 10px; font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; }
+  .month { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .month button { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); font-size: 20px; line-height: 1; color: var(--leaf); }
   .month button:disabled { opacity: .35; }
-  .month-name { font-size: 24px; font-weight: 700; text-align: center; line-height: 1.1; }
-  .month-sub { font-size: 14px; color: var(--muted); text-align: center; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-  .stat { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-md); padding: 12px; text-align: center; }
-  .stat b { display: block; font-size: 30px; line-height: 1.1; }
-  .stat span { font-size: 13px; color: var(--muted); }
-  .stat.ok { border-color: var(--leaf-mid); } .stat.ok b { color: var(--leaf); }
-  .stat.part b { color: #8A5F00; }
-  .stat.no b { color: var(--chili); }
-  .bar-line { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-top: 16px; }
-  .bar-line b { color: var(--ink); }
-  .bar { height: 10px; background: var(--line); border-radius: var(--r-sm); margin-top: 6px; overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0; background: var(--turmeric); border-radius: var(--r-sm); transition: width .6s ease; }
-  h2 { font-size: 18px; margin: 24px 2px 10px; }
-  .list { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
-  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--line); }
-  .row:last-child { border-bottom: 0; }
-  .row small { display: block; color: var(--muted); font-size: 13px; }
-  .pill { font-size: 13px; font-weight: 600; border-radius: var(--r-sm); padding: 2px 11px; white-space: nowrap; }
-  .pill.ok { background: var(--leaf-lt); color: var(--leaf); }
-  .pill.part { background: var(--turmeric-lt); color: #8A5F00; }
-  .pill.no { background: var(--chili-lt); color: var(--chili); }
-  .pill.wait { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+  .month-name { font-size: 20px; font-weight: 700; text-align: center; line-height: 1.1; }
+  .month-sub { font-size: 13px; color: var(--muted); text-align: center; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { border-radius: 10px; padding: 10px; background: var(--paper); }
+  .kpi span { display: block; font-size: 13px; color: var(--muted); }
+  .kpi b { display: block; font-size: 20px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .kpi.ok b { color: var(--leaf); }
+  .kpi.due b { color: var(--chili); }
+  .kpi.done b { color: var(--leaf); }
+  .bar { height: 10px; background: var(--line); border-radius: var(--r-sm); margin-top: 14px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--leaf); border-radius: var(--r-sm); transition: width .6s ease; }
+  .bar-sub { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .chart { display: flex; align-items: flex-end; gap: 6px; height: 140px; margin-top: 6px; }
+  .col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; cursor: pointer; border: 0; background: none; padding: 0; }
+  .col .track { width: 100%; max-width: 30px; height: 100%; background: var(--paper); border-radius: 6px; position: relative; overflow: hidden; border: 1px solid var(--line); }
+  .col .track i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--leaf-mid); transition: height .6s ease; }
+  .col.cur .track { border-color: var(--leaf); }
+  .col.cur .track i { background: var(--leaf); }
+  .col span { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .col.cur span { color: var(--ink); font-weight: 600; }
+  .legend { font-size: 13px; color: var(--muted); margin-top: 10px; }
   .note { color: var(--muted); font-size: 13px; text-align: center; margin-top: 18px; }
   .note a { color: var(--leaf); }
   .msg { padding: 60px 16px; text-align: center; color: var(--muted); }
@@ -63,69 +64,101 @@
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand">Picnic Fund <small>Status</small></div>
-    <div class="fund"><span>Total fund so far</span><b id="total">...</b></div>
+    <div class="brand">Picnic Fund <small>Dashboard</small></div>
+    <div class="fund"><span>Total fund</span><b id="total">...</b><small id="fundSub"></small></div>
   </div>
 </header>
 
 <div id="msg" class="msg">Loading...</div>
 
 <main id="app" class="wrap hidden">
-  <div class="month">
-    <button id="prevM" aria-label="Previous month">&#8249;</button>
-    <div><div class="month-name" id="mName"></div><div class="month-sub" id="mSub"></div></div>
-    <button id="nextM" aria-label="Next month">&#8250;</button>
+  <h2>This month</h2>
+  <div class="card">
+    <div class="month">
+      <button id="prevM" aria-label="Previous month">&#8249;</button>
+      <div><div class="month-name" id="mName"></div><div class="month-sub" id="mSub"></div></div>
+      <button id="nextM" aria-label="Next month">&#8250;</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span>Target</span><b id="mExp"></b></div>
+      <div class="kpi ok"><span>Paid</span><b id="mGot"></b></div>
+      <div class="kpi due" id="mDueBox"><span>Due</span><b id="mDue"></b></div>
+    </div>
+    <div class="bar"><i id="mBar"></i></div>
+    <div class="bar-sub"><span id="mPct"></span><span id="mFam"></span></div>
   </div>
 
-  <div class="stats">
-    <div class="stat ok"><b id="nPaid"></b><span>Paid</span></div>
-    <div class="stat part"><b id="nPart"></b><span>Partly paid</span></div>
-    <div class="stat no"><b id="nNot"></b><span>Not paid</span></div>
+  <h2>So far</h2>
+  <div class="card">
+    <div class="kpis">
+      <div class="kpi"><span>Target</span><b id="yExp"></b></div>
+      <div class="kpi ok"><span>Paid</span><b id="yGot"></b></div>
+      <div class="kpi due" id="yDueBox"><span>Due</span><b id="yDue"></b></div>
+    </div>
+    <div class="bar"><i id="yBar"></i></div>
+    <div class="bar-sub"><span id="yPct"></span><span id="ySub"></span></div>
   </div>
-  <div class="bar-line"><span>Collected this month</span><span><b id="mGot"></b> of <span id="mDue"></span></span></div>
-  <div class="bar"><i id="mBar"></i></div>
 
-  <h2>Families</h2>
-  <div class="list" id="list"></div>
+  <h2>Month by month</h2>
+  <div class="card">
+    <div class="chart" id="chart"></div>
+    <div class="legend">Each bar shows how much of that month's target is paid. Tap a month to see it above.</div>
+  </div>
 
-  <p class="note">Updates as soon as a payment is recorded. <a href="./">Cashier or admin login</a></p>
+  <p class="note">Updates on its own every minute. <a href="./">Cashier or admin login</a></p>
 </main>
 
 <script>
   var API = 'https://lmvcjdqdbtczqkunuvuv.supabase.co/rest/v1/rpc/';
   var KEY = 'sb_publishable_kyg2uy9TmKa2BzTNLhRPRw_BcsPgJT9';
   var MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var D = null, mi = 0;
+  var MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var D = null, mi = 0, cur = 0;
   var $ = function (id) { return document.getElementById(id); };
-  function tk(n) { return '৳' + Number(n).toLocaleString('en-US'); }
+  function tk(n) { return '৳' + Math.round(Number(n)).toLocaleString('en-US'); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function today() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function mLong(s) { var p = s.split('-'); return MN[Number(p[1]) - 1] + ' ' + p[0]; }
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function people(n) { return n + (n === 1 ? ' person' : ' people'); }
+  function mShort(s) { return MS[Number(s.split('-')[1]) - 1]; }
+  function pct(a, b) { return b ? Math.min(100, Math.round(a / b * 100)) : 0; }
 
   function render() {
-    var m = D.months[mi], overdue = today() > m.slice(0, 8) + pad(D.deadline);
-    var future = today() < m;
+    var x = D.months[mi], m = x.m, t = today();
+    var started = t >= m, overdue = t > m.slice(0, 8) + pad(D.deadline);
+    var due = Math.max(0, x.expected - x.collected);
     $('mName').textContent = mLong(m);
-    $('mSub').textContent = future ? 'Not started yet' : overdue ? 'Deadline was the ' + D.deadline + 'th' : 'Due by the ' + D.deadline + 'th';
+    $('mSub').textContent = !started ? 'Not started yet' : overdue ? 'Deadline was the ' + D.deadline + 'th' : 'Due by the ' + D.deadline + 'th';
     $('prevM').disabled = mi === 0; $('nextM').disabled = mi === D.months.length - 1;
-    var paid = 0, part = 0, not = 0, got = 0, due = 0, rows = [];
-    D.families.forEach(function (f) {
-      var d = f.members * D.rate, p = Number(f.paid[m] || 0), st, cls;
-      got += p; due += d;
-      if (p >= d) { paid++; st = 'Paid'; cls = 'ok'; }
-      else if (p > 0) { part++; st = 'Partly paid'; cls = 'part'; }
-      else { not++; st = overdue ? 'Not paid' : 'Not yet'; cls = overdue ? 'no' : 'wait'; }
-      rows.push({ f: f, st: st, cls: cls, order: { ok: 2, part: 1, no: 0, wait: 0 }[cls] });
-    });
-    rows.sort(function (a, b) { return a.order - b.order; });
-    $('nPaid').textContent = paid; $('nPart').textContent = part; $('nNot').textContent = not;
-    $('mGot').textContent = tk(got); $('mDue').textContent = tk(due);
-    $('mBar').style.width = (due ? Math.min(100, got / due * 100) : 0) + '%';
-    $('list').innerHTML = rows.map(function (r) {
-      return '<div class="row"><div>' + esc(r.f.name) + '<small>' + people(r.f.members) + '</small></div><span class="pill ' + r.cls + '">' + r.st + '</span></div>';
+    $('mExp').textContent = tk(x.expected); $('mGot').textContent = tk(x.collected);
+    $('mDue').textContent = due ? tk(due) : 'None';
+    $('mDueBox').className = 'kpi ' + (due ? 'due' : 'done');
+    $('mBar').style.width = pct(x.collected, x.expected) + '%';
+    $('mPct').textContent = pct(x.collected, x.expected) + '% paid';
+    $('mFam').textContent = x.paid + ' of ' + D.families + ' families fully paid' + (x.part ? ', ' + x.part + ' partly' : '');
+
+    each(document.querySelectorAll('.col'), function (c, i) { c.classList.toggle('cur', i === mi); });
+  }
+  function each(l, f) { Array.prototype.forEach.call(l, f); }
+
+  function renderAll() {
+    var t = today(), exp = 0, got = 0, adv = 0, n = 0;
+    D.months.forEach(function (x) { if (t >= x.m) { exp += Number(x.expected); got += Number(x.collected); n++; } else adv += Number(x.collected); });
+    var due = Math.max(0, exp - got);
+    $('total').textContent = tk(D.total);
+    $('fundSub').textContent = D.families + ' families, ' + D.people + ' people';
+    $('yExp').textContent = tk(exp); $('yGot').textContent = tk(got);
+    $('yDue').textContent = due ? tk(due) : 'None';
+    $('yDueBox').className = 'kpi ' + (due ? 'due' : 'done');
+    $('yBar').style.width = pct(got, exp) + '%';
+    $('yPct').textContent = pct(got, exp) + '% paid';
+    $('ySub').textContent = adv ? '+ ' + tk(adv) + ' paid in advance' : n + (n === 1 ? ' month' : ' months') + ' since ' + mLong(D.months[0].m).split(' ')[0];
+
+    $('chart').innerHTML = D.months.map(function (x, i) {
+      return '<button class="col" data-i="' + i + '" aria-label="' + mLong(x.m) + ', ' + pct(x.collected, x.expected) + '% paid">' +
+        '<div class="track"><i style="height:' + pct(x.collected, x.expected) + '%"></i></div><span>' + mShort(x.m) + '</span></button>';
     }).join('');
+    each($('chart').children, function (b) { b.onclick = function () { mi = Number(b.getAttribute('data-i')); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }; });
+    render();
   }
 
   function load() {
@@ -134,12 +167,12 @@
       .then(function (d) {
         var first = !D; D = d;
         if (first) {
-          var t = today().slice(0, 8) + '01', i = d.months.indexOf(t);
-          mi = i >= 0 ? i : (t < d.months[0] ? 0 : d.months.length - 1);
+          var t = today().slice(0, 8) + '01', i = -1;
+          d.months.forEach(function (x, k) { if (x.m === t) i = k; });
+          mi = i >= 0 ? i : (t < d.months[0].m ? 0 : d.months.length - 1);
         }
-        $('total').textContent = tk(d.total);
         $('msg').classList.add('hidden'); $('app').classList.remove('hidden');
-        render();
+        renderAll();
       })
       .catch(function () { if (!D) $('msg').textContent = 'Could not load. Check the internet and refresh.'; });
   }
