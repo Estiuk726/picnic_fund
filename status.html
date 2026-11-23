@@ -56,6 +56,17 @@
   .col span { font-size: 11px; color: var(--muted); margin-top: 4px; }
   .col.cur span { color: var(--ink); font-weight: 600; }
   .legend { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .more { display: block; width: 100%; margin-top: 14px; border: 1.5px solid var(--leaf); background: #fff; color: var(--leaf);
+          border-radius: var(--r-sm); padding: 9px 14px; font-weight: 600; font-size: 15px; }
+  .det { margin-top: 12px; border-top: 1px solid var(--line); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row small { display: block; color: var(--muted); font-size: 13px; }
+  .pill { font-size: 13px; font-weight: 600; border-radius: var(--r-sm); padding: 2px 11px; white-space: nowrap; }
+  .pill.ok { background: var(--leaf-lt); color: var(--leaf); }
+  .pill.part { background: var(--turmeric-lt); color: #8A5F00; }
+  .pill.no { background: var(--chili-lt); color: var(--chili); }
+  .pill.wait { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
   .note { color: var(--muted); font-size: 13px; text-align: center; margin-top: 18px; }
   .note a { color: var(--leaf); }
   .msg { padding: 60px 16px; text-align: center; color: var(--muted); }
@@ -86,6 +97,8 @@
     </div>
     <div class="bar"><i id="mBar"></i></div>
     <div class="bar-sub"><span id="mPct"></span><span id="mFam"></span></div>
+    <button class="more" id="moreBtn" aria-expanded="false">See family details</button>
+    <div class="det hidden" id="det"></div>
   </div>
 
   <h2>So far</h2>
@@ -137,7 +150,21 @@
     $('mFam').textContent = x.paid + ' of ' + D.families + ' families fully paid' + (x.part ? ', ' + x.part + ' partly' : '');
 
     each(document.querySelectorAll('.col'), function (c, i) { c.classList.toggle('cur', i === mi); });
+
+    var rows = (D.detail || []).map(function (f) {
+      var st = f.s[m], cls, label;
+      if (st === 'paid') { cls = 'ok'; label = 'Paid'; }
+      else if (st === 'part') { cls = 'part'; label = 'Partly paid'; }
+      else if (overdue) { cls = 'no'; label = 'Not paid'; }
+      else { cls = 'wait'; label = 'Not yet'; }
+      return { f: f, cls: cls, label: label, o: { no: 0, wait: 0, part: 1, ok: 2 }[cls] };
+    }).sort(function (a, b) { return a.o - b.o; });
+    $('det').innerHTML = rows.map(function (r) {
+      return '<div class="row"><div>' + esc(r.f.name) + '<small>' + r.f.members + (r.f.members === 1 ? ' person' : ' people') + '</small></div>' +
+        '<span class="pill ' + r.cls + '">' + r.label + '</span></div>';
+    }).join('');
   }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function each(l, f) { Array.prototype.forEach.call(l, f); }
 
   function renderAll() {
@@ -176,6 +203,11 @@
       })
       .catch(function () { if (!D) $('msg').textContent = 'Could not load. Check the internet and refresh.'; });
   }
+  $('moreBtn').onclick = function () {
+    var open = $('det').classList.toggle('hidden') === false;
+    $('moreBtn').textContent = open ? 'Hide family details' : 'See family details';
+    $('moreBtn').setAttribute('aria-expanded', open);
+  };
   $('prevM').onclick = function () { if (mi > 0) { mi--; render(); } };
   $('nextM').onclick = function () { if (mi < D.months.length - 1) { mi++; render(); } };
   load();
